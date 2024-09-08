@@ -1,6 +1,7 @@
 {
-  "name": "vacas-rrhh",
-  "version": "1.0.3",
+  "name": "vacaciones",
+  "version": "1.0.5",
+  "description" :"",
   "main": "src/index.js",
   "scripts": {
     "start": "electron .",
@@ -20,7 +21,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "Aplicacion para la gestion de Vacaciones de los colaboradores",
   "dependencies": {
     "electron-log": "^5.2.0",
     "electron-reload": "^2.0.0-alpha.1",
