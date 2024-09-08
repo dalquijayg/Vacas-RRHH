@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagina principal</title>
+    <link rel="stylesheet" href="../Disenos/Home.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+<body>
+    <div id="loader-overlay" class="loader-overlay" style="display: none;">
+        <div class="loader"></div>
+    </div>
+    <nav class="menu-principal">
+        <ul>
+            <li class="menu-item" id="inicio-tab">
+                <a href="#"><i class="fas fa-home"></i> Inicio</a>
+            </li>
+            <li class="menu-item" id="administracion-tab">
+                <a href="#">Administración</a>
+            </li>
+            <li class="menu-item" id="gestion-vacaciones-tab">
+                <a href="#">Gestión de Vacaciones</a>
+            </li>
+        </ul>
+    </nav>
+    <div class="submenu-container">
+        <div class="submenu" id="administracion-submenu">
+            <div class="submenu-header">
+                <a href="#" class="submenu-title" data-target="registro-general">Registro General</a>
+                <a href="#" class="submenu-title" data-target="historial">Reportes</a>
+                <a href="#" class="submenu-title" data-target="pagos">Pagos</a>
+            </div>
+            <div class="submenu-content">
+                <div class="submenu-section" id="ingreso-section">
+                    <h3>Ingreso</h3>
+                    <a href="#" id="menu-ingreso-personal">Personal</a>
+                    <a href="#" id="menu-ingreso-departamento">Departamento</a>
+                    <a href="#" id="menu-ingreso-planillas">Planillas</a>
+                    <a href="#" id="menu-ingreso-division">División</a>
+                    <a href="#" id="menu-ingreso-puestos">Puestos Generales</a>
+                </div>
+                <div class="submenu-section" id="modificacion-section">
+                    <h3>Modificación</h3>
+                    <a href="#" id="menu-modificacion-personal">Personal</a>
+                    <a href="#" id="menu-modificacion-departamento">Departamento</a>
+                    <a href="#" id="menu-modificacion-planillas">Planillas</a>
+                    <a href="#" id="menu-modificacion-division">División</a>
+                    <a href="#" id="menu-modificacion-puestos">Puestos Generales</a>
+                </div>
+                <div class="submenu-section" id="registro-general-section">
+                    <h3>Registro General</h3>
+                    <a href="#" id="menu-registro-vacaciones">Registro de Vacaciones</a>
+                    <a href="#" id="menu-registro-pago-vacaciones">Registro de Pago de Vacaciones</a>
+                </div>
+                <div class="submenu-section" id="historial-section">
+                    <h3>Reportes</h3>
+                    <a href="#" id="menu-historial-por-departamento">Por Departamento</a>
+                    <a href="#" id="menu-reporte-pagos">Reporte de Pagos</a>
+                    <a href="#" id="menu-reporte-vacaciones">Reporte de Vacaciones</a>
+                </div>
+                <div class="submenu-section" id="pagos-section">
+                    <h3>Pagos de Vacaciones</h3>
+                    <a href="#" id="menu-pago-vacaciones">Pago Vacaciones por autorizar</a>
+                    <a href="#" id="menu-pagos-autorizados">Pagos Autorizados</a>
+                </div>
+                
+            </div>
+        </div>
+        <div class="submenu" id="gestion-vacaciones-submenu">
+            <div class="submenu-header">
+                <a href="#" class="submenu-title" data-target="vacaciones">Vacaciones</a>
+                <a href="#" class="submenu-title" data-target="documentacion">Documentación</a>
+            </div>
+            <div class="submenu-content">
+                <div class="submenu-section" id="vacaciones-section">
+                    <h3>Vacaciones</h3>
+                    <a href="#" id="menu-toma-vacaciones">Toma de Vacaciones</a>
+                    <a href="#" id="menu-solicitar-pago-vacaciones">Solicitar pago vacaciones</a>
+                </div>
+                <div class="submenu-section" id="documentacion-section">
+                    <h3>Documentación</h3>
+                    <a href="#" id="menu-doc-vacaciones-tomadas">Doc. Vacaciones Tomadas</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="saludo-card">
+        <div class="saludo-header">
+            <img id="saludo-icon" src="" alt="Icono saludo">
+            <h2 id="saludo-title"></h2>
+        </div>
+        <p id="saludo-message"></p>
+    </div>
+
+    <div id="personal-form" class="form-container" style="display: none;">
+        <h2>Datos Personales</h2>
+        <form id="personalDataForm">
+            <div class="form-section">
+                <h3 class="form-section-header">Información Personal</h3>
+                <div class="form-section-content">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="primerNombre">Primer Nombre</label>
+                            <input type="text" id="primerNombre" name="primerNombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="segundoNombre">Segundo Nombre</label>
+                            <input type="text" id="segundoNombre" name="segundoNombre">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="primerApellido">Primer Apellido</label>
+                            <input type="text" id="primerApellido" name="primerApellido" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="segundoApellido">Segundo Apellido</label>
+                            <input type="text" id="segundoApellido" name="segundoApellido">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fechaNacimiento">Fecha de Nacimiento</label>
+                            <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="noDPI">No. DPI</label>
+                            <input type="text" id="noDPI" name="noDPI" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="estadoCivil">Estado Civil</label>
+                            <select id="estadoCivil" name="estadoCivil" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="genero">Género</label>
+                            <select id="genero" name="genero" required></select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="hijos">Cantidad de Hijos</label>
+                            <select id="hijos" name="hijos" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tipoSangre">Tipo de Sangre</label>
+                            <select id="tipoSangre" name="tipoSangre" required></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="form-section-header">Información de Contacto</h3>
+                <div class="form-section-content">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="departamentoguate">Departamento Guatemala</label>
+                            <select id="departamentoguate" name="departamentoguate" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="municipio">Municipio</label>
+                            <select id="municipio" name="municipio" required></select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="noTelefono">No. Teléfono</label>
+                            <input type="text" id="noTelefono" name="noTelefono" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="correoelectronico">Correo Electronico</label>
+                            <input type="textcorreo" id="correo" name="correo" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-section">
+                <h3 class="form-section-header">Contacto de Emergencia</h3>
+                <div class="form-section-content">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nombreContactoEmergencia">Nombre de Contacto</label>
+                            <input type="text" id="nombreContactoEmergencia" name="nombreContactoEmergencia" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="telefonoContactoEmergencia">Teléfono de Contacto</label>
+                            <input type="tel" id="telefonoContactoEmergencia" name="telefonoContactoEmergencia" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="parentescoContactoEmergencia">Parentesco</label>
+                            <select id="parentescoContactoEmergencia" name="parentescoContactoEmergencia" required></select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-section">
+                <h3 class="form-section-header">Información Laboral</h3>
+                <div class="form-section-content">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="division">División</label>
+                            <select id="division" name="division" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="departamento">Departamento</label>
+                            <select id="departamento" name="departamento" required></select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="puesto">Puesto</label>
+                            <input type="text" id="puesto" name="puesto" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="puestoGeneral">Puesto General</label>
+                            <select id="puestoGeneral" name="puestoGeneral" required></select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="planilla">Planilla</label>
+                            <select id="planilla" name="planilla" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="sueldoDiario">Sueldo Diario (Q)</label>
+                            <input type="number" id="sueldoDiario" name="sueldoDiario" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="sueldoQuincenal">Sueldo Quincenal (Q)</label>
+                            <input type="number" id="sueldoQuincenal" name="sueldoQuincenal" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="sueldoQuincenal2">Sueldo Quincenal 2 (Q)</label>
+                            <input type="number" id="sueldoQuincenal2" name="sueldoQuincenal2" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fechaInicioLaboral">Fecha de Inicio Laboral</label>
+                            <input type="date" id="fechaInicioLaboral" name="fechaInicioLaboral" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="fechaInicioPlanilla">Fecha de Inicio en Planilla</label>
+                            <input type="date" id="fechaInicioPlanilla" name="fechaInicioPlanilla" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit">Guardar</button>
+            </div>
+        </form>
+    </div>
+    <div id="vacation-section" style="display: none;">
+        <div id="employee-list-toggle">
+            <h3>Lista de Colaboradores <span id="toggle-icon"></span></h3>
+        </div>
+        <div class="filter-container">
+            <select id="departamento-filter" class="departamento-select">
+                <option value="">Todos los departamentos</option>
+            </select>
+            <div class="search-container">
+                <input type="text" id="employee-search" placeholder="Buscar Colaborador...">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+        </div>
+        <h2 id="action-title"></h2>
+        <div id="employee-list">
+            <table id="employee-table">
+                <thead>
+                    <tr>
+                        <th>Nombre Completo</th>
+                        <th>Inicio en Planilla</th>
+                        <th>Días Disponibles</th>
+                        <th>Puesto</th>
+                        <th>Departamento</th>
+                        <th>Planilla</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los datos se llenarán dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+        <div id="calendar-container" style="display: none;">
+            <h2 id="selected-employee-info"></h2>
+            <div id="vacation-calendar"></div>
+        </div>
+        <div id="vacation-payment-info" style="display: none;">
+            <!-- La información de pago de vacaciones se llenará dinámicamente -->
+        </div>
+    </div>
+    <div id="pago-vacaciones-section" style="display: none;">
+        <h2>Pagos por Autorizar</h2>
+        <div class="filter-container">
+            <select id="departamento-filter-pago" class="departamento-select custom-select">
+                <option value="">Todos los departamentos</option>
+            </select>
+        </div>
+        <div id="pago-vacaciones-grid">
+            <table id="pago-vacaciones-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre Completo</th>
+                        <th>Fecha Registro</th>
+                        <th>Días Solicitados</th>
+                        <th>Periodo</th>
+                        <th>Planilla</th>
+                        <th>Departamento</th>
+                        <th>Encargado</th>
+                        <th>Salario Diario</th>
+                        <th>Salario Total</th> 
+                        <th>Autorizar</th>
+                        <th>Anular</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los datos se llenarán dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="doc-vacaciones-tomadas-section" style="display: none;">
+        <h2>Documentación de Vacaciones Tomadas</h2>
+        <div class="search-container">
+            <input type="text" id="doc-vacaciones-search" placeholder="Buscar por nombre...">
+        </div>
+        <div id="doc-vacaciones-tomadas-grid">
+            <table id="doc-vacaciones-tomadas-table">
+                <thead>
+                    <tr>
+                        <th>ID Personal</th>
+                        <th>Nombre Completo</th>
+                        <th>No. DPI</th>
+                        <th>Planilla</th>
+                        <th>Periodo</th>
+                        <th>Cantidad de Días</th>
+                        <th>Imprimir</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los datos se llenarán dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="anniversary-employees-section" style="display: none;">
+        <h2>Colaboradores próximos a cumplir un periodo nuevo</h2>
+        <table id="anniversary-employees-table">
+            <thead>
+                <tr>
+                    <th>Nombre Completo</th>
+                    <th>Departamento</th>
+                    <th>Fecha de Inicio en Planilla</th>
+                    <th>Días Restantes para proximo periodo</th>
+                    <th>Días Acumulados</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Los datos se llenarán dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+    <div id="historial-por-departamento-section" style="display: none;">
+        <h2>Reporte por Departamento</h2>
+        <div class="combobox-container">
+            <select id="departamento-select">
+                <option value="">Todos los departamentos</option>
+            </select>
+        </div>
+        <div id="empleados-grid" class="grid-container">
+            <table id="empleados-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre Completo</th>
+                        <th>Inicio en Planilla</th>
+                        <th>Departamento</th>
+                        <th>Días Disponibles</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los datos se llenarán dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="reporte-pagos-section" style="display: none;">
+        <h2>Reporte de Pagos</h2>
+        <div class="combobox-container">
+            <select id="estado-pago-select">
+                <option value="">Seleccione un estado de pago</option>
+            </select>
+        </div>
+        <div id="reporte-pagos-grid" class="grid-container">
+            <table id="reporte-pagos-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre Completo</th>
+                        <th>Fecha Registro</th>
+                        <th>Días Solicitados</th>
+                        <th>Periodo</th>
+                        <th>Planilla</th>
+                        <th>Departamento</th>
+                        <th>Persona Registro</th>
+                        <th>Personal Pago</th>
+                        <th>No. Cheque</th>
+                        <th>No. Recibo</th>
+                        <th>Fecha Pago</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los datos se llenarán dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="reporte-vacaciones-section" style="display: none;">
+        <h2>Reporte de Vacaciones</h2>
+        <div class="date-range-container">
+            <div class="date-input">
+                <label for="fecha-desde">Desde:</label>
+                <input type="date" id="fecha-desde">
+            </div>
+            <div class="date-input">
+                <label for="fecha-hasta">Hasta:</label>
+                <input type="date" id="fecha-hasta">
+            </div>
+            <div class="departamento-input">
+                <label for="departamento-filter-reporte">Departamento:</label>
+                <select id="departamento-filter-reporte" class="custom-select">
+                    <option value="">Todos los departamentos</option>
+                </select>
+            </div>
+            <button id="generar-reporte-vacaciones" class="btn-generar">Generar Reporte</button>
+        </div>
+        <div id="reporte-vacaciones-grid" class="grid-container">
+            <table id="reporte-vacaciones-table">
+                <thead>
+                    <tr>
+                        <th>Nombre Completo</th>
+                        <th>Periodo</th>
+                        <th>Departamento</th>
+                        <th>Total Vacaciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los datos se llenarán dinámicamente -->
+                </tbody>
+            </table>
+            <div id="detalle-vacaciones-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2>Detalle de Vacaciones</h2>
+                    <p id="detalle-empleado-info"></p>
+                    <div id="detalle-vacaciones-grid">
+                        <table id="detalle-vacaciones-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Los datos se llenarán dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="pagos-autorizados-section" style="display: none;">
+        <h2>Pagos Autorizados</h2>
+        <div class="filter-container">
+            <select id="departamento-filter-pagos-autorizados" class="departamento-select custom-select">
+                <option value="">Todos los departamentos</option>
+            </select>
+        </div>
+        <div id="pagos-autorizados-grid">
+            <table id="pagos-autorizados-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre Completo</th>
+                        <th>Fecha Registro</th>
+                        <th>Días Solicitados</th>
+                        <th>Periodo</th>
+                        <th>Planilla</th>
+                        <th>Departamento</th>
+                        <th>Encargado</th>
+                        <th>Total a Recibir</th>
+                        <th>No. Recibo</th>
+                        <th>No. Cheque</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los datos se llenarán dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="../Logica/Home.js"></script>
+</body>
+</html>

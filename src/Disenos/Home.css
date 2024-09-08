@@ -1,0 +1,1317 @@
+/* Estilos para el menú principal */
+.menu-principal {
+    background-color: #2c3e50;
+    padding: 0;
+    margin: 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    position: fixed;  /* Hace que el menú se mantenga fijo */
+    top: 0;           /* Lo coloca en la parte superior */
+    left: 0;          /* Lo alinea a la izquierda */
+    right: 0;         /* Lo extiende hasta la derecha */
+    z-index: 1000;    /* Asegura que esté por encima de otros elementos */
+}
+
+.menu-principal ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.menu-principal .menu-item {
+    padding: 15px 20px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.menu-principal .menu-item i {
+    margin-right: 5px;
+}
+
+#inicio-tab {
+    background-color: #27ae60;
+}
+
+#inicio-tab:hover {
+    background-color: #2ecc71;
+}
+
+.menu-principal .menu-item:hover,
+.menu-principal .menu-item.active {
+    background-color: #34495e;
+}
+
+.menu-principal .menu-item a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* Estilos para los     menús */
+.submenu-container {
+    background-color: #34495e;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    position: fixed;
+    top: 50px; /* Ajusta este valor para que coincida con la altura de tu menú principal */
+    left: 0;
+    right: 0;
+    z-index: 999;
+}
+.submenu-container.active {
+    max-height: 500px; /* Ajusta este valor según sea necesario */
+}
+.submenu {
+    display: none;
+    padding: 0;
+}
+
+.submenu.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+.submenu-header {
+    display: flex;
+    border-bottom: 1px solid #455a64;
+}
+
+.submenu-title {
+    color: #ecf0f1;
+    text-decoration: none;
+    padding: 15px 20px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border-bottom: 3px solid transparent;
+}
+
+.submenu-title:hover,
+.submenu-title.active {
+    background-color: #2c3e50;
+    color: #3498db;
+    border-bottom-color: #3498db;
+}
+
+.submenu-content {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.submenu-section {
+    flex: 1;
+    padding: 0 15px;
+    display: none;
+}
+
+.submenu-section.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.submenu-section h3 {
+    color: #3498db;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.submenu-section a {
+    color: #ecf0f1;
+    text-decoration: none;
+    display: block;
+    padding: 5px 0;
+    transition: color 0.3s ease;
+}
+
+.submenu-section a:hover {
+    color: #3498db;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes slideDown {
+    from { max-height: 0; }
+    to { max-height: 500px; } /* Ajusta este valor según sea necesario */
+}
+
+@keyframes slideUp {
+    from { max-height: 500px; } /* Ajusta este valor según sea necesario */
+    to { max-height: 0; }
+}
+
+/* Estilos para el formulario */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7f9;
+    margin: 0;
+    padding: 20px;
+    padding-top: 50px;
+}
+
+.form-container {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+h2 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.form-section {
+    margin-bottom: 40px;
+}
+
+h3 {
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.form-group {
+    flex: 0 0 48%;
+}
+
+.form-group:last-child {
+    margin-right: 0;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="tel"],
+input[type="textcorreo"],
+input[type="number"],
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 15px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+input[type="tel"]:focus,
+input[type="textcorreo"]:focus,
+input[type="number"]:focus,
+select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+    outline: none;
+}
+
+.form-actions {
+    text-align: center;
+    margin-top: 30px;
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+/* Estilos para el saludo */
+.saludo-card {
+    width: 300px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.saludo-card:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+.saludo-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+#saludo-icon {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+}
+
+#saludo-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+}
+
+#saludo-message {
+    font-size: 16px;
+    color: #666;
+    text-align: center;
+}
+
+/* Nuevo: Estilos para el spinner de carga */
+.loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loader {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #ee7614;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Nuevo: Estilos para el campo de búsqueda */
+.search-container {
+    width: 48%;
+    position: relative;
+}
+.search-icon {
+    position: absolute;
+    right: 15x;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #F2631C;
+}
+
+#employee-search {
+    width: 100%;
+    padding: 8px 35px 10px 15px;
+    border:  2px solid #F2631C;
+    border-radius: 20px;
+    font-size: 16px;
+    outline: none;
+}
+#employee-search:focus {
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+}
+/* Estilos mejorados para el DataGridView */
+#vacation-section {
+    max-width: 1200px;
+    margin: 20px auto;
+}
+
+#employee-list {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+#employee-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden; 
+    table-layout: auto;
+}
+
+#employee-table th, #employee-table td {
+    padding: 12px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#employee-table th {
+    background-color: #C2631F;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-align: center; 
+}
+
+#employee-table td {
+    border-bottom: 1px solid #eee;
+}
+
+#employee-table tbody tr:hover {
+    background-color: #f5f5f5;
+    cursor: pointer;
+}
+
+#employee-table tbody tr.selected {
+    background-color: #e8f4f8;
+}
+
+/* Estilos para diferentes modos de vacaciones */
+#employee-table.toma-vacaciones th {
+    background-color: #F2631C;
+}
+
+#employee-table.pago-vacaciones th {
+    background-color: #e74c3c;
+}
+
+#calendar-container {
+    width: 90%;
+    margin: 0 auto;
+}
+
+#selected-employee-info {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #F2631C;
+}
+
+#vacation-calendar {
+    height: 700px;
+}
+
+#employee-list-toggle {
+    background-color: #F2631C;
+    color: white;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#employee-list-toggle h3 {
+    margin: 0;
+}
+#employee-table th:nth-child(1),
+#employee-table td:nth-child(1) {
+    width: auto;
+    min-width: 200px; /* Ajusta esto según tus necesidades */
+}
+#employee-table th:nth-child(2),
+#employee-table td:nth-child(2) {
+    width: auto;
+    min-width: 100px;
+}
+#employee-table td.dias-disponibles {
+    text-align: center;
+    font-weight: bold;
+}
+
+#toggle-icon {
+    transition: transform 0.3s ease;
+}
+
+#employee-list-toggle.collapsed #toggle-icon {
+    transform: rotate(-90deg);
+}
+
+#employee-list {
+    max-height: 500px;
+    overflow-y: auto;
+    transition: max-height 0.3s ease;
+}
+
+#employee-list.collapsed {
+    max-height: 0;
+    overflow: hidden;
+}
+
+.fc-day-disabled {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+#vacation-payment-info table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#vacation-payment-info th, #vacation-payment-info td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+#vacation-payment-info th {
+    background-color: #2c3e50;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+#vacation-payment-info .periodo-cell {
+    text-align: center;
+    font-weight: bold;
+}
+
+#vacation-payment-info .dias-disponibles {
+    text-align: center;
+    font-weight: bold;
+}
+
+#vacation-payment-info .input-dias {
+    text-align: center;
+    font-weight: bold;
+}
+
+#vacation-payment-info tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+#vacation-payment-info .input-dias {
+    width: 60px;
+    height: 30px;
+    text-align: center;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 0 5px;
+}
+
+#vacation-payment-info .input-dias:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,.25);
+}
+
+#vacation-payment-info .input-dias::-webkit-inner-spin-button, 
+#vacation-payment-info .input-dias::-webkit-outer-spin-button { 
+    opacity: 1;
+    height: 30px;
+}
+
+.save-vacation-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.save-vacation-button:hover {
+    background-color: #27ae60;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+    }
+
+    .form-group {
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+
+    .saludo-card {
+        position: static;
+        margin: 20px auto;
+    }
+}
+#vacation-payment-history {
+    max-width: 1200px;
+    margin: 20px auto;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+}
+
+#vacation-payment-history h2 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#vacation-payment-table {
+    width: 100% !important;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+#vacation-payment-table thead th {
+    background-color: #3498db;
+    color: white;
+    font-weight: bold;
+    padding: 12px;
+    text-align: left;
+    border-bottom: 2px solid #2980b9;
+}
+
+#vacation-payment-table tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+#vacation-payment-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    background: #3498db;
+    color: white !important;
+    border: 1px solid #3498db;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #2980b9;
+    color: white !important;
+    border: 1px solid #2980b9;
+}
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_processing,
+.dataTables_wrapper .dataTables_paginate {
+    color: #2c3e50;
+}
+
+.dataTables_wrapper .dataTables_length select,
+.dataTables_wrapper .dataTables_filter input {
+    border: 1px solid #ecf0f1;
+    border-radius: 4px;
+    padding: 5px;
+}
+#pago-vacaciones-section {
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#pago-vacaciones-grid {
+    width: 100%;
+    overflow-x: auto;
+}
+
+#pago-vacaciones-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+#pago-vacaciones-table th, #pago-vacaciones-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+#pago-vacaciones-table th {
+    background-color: #f2631C;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.85em;
+    color: #333;
+    text-align: center;
+}
+
+#pago-vacaciones-table tbody tr:hover {
+    background-color: #f5f5f5;
+}
+#pago-vacaciones-table tr:hover {
+    background-color: #f5f5f5;
+}
+#pago-vacaciones-table td:nth-child(3),
+#pago-vacaciones-table td:nth-child(4),
+#pago-vacaciones-table td:nth-child(9),
+#pago-vacaciones-table td:nth-child(10) {
+    text-align: right;
+}
+
+/* Responsive design para el DataGridView */
+@media screen and (max-width: 1200px) {
+    #pago-vacaciones-table {
+        font-size: 14px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    #pago-vacaciones-table {
+        font-size: 12px;
+    }
+}
+#pago-vacaciones-table input[type="text"] {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#pago-vacaciones-table .save-button {
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#pago-vacaciones-table .save-button:hover {
+    background-color: #27ae60;
+}
+.save-button {
+    background-color: #4CAF50;
+}
+.anular-button {
+    background-color: #f44336;
+}
+.save-button, .anular-button {
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+.save-button:hover, .anular-button:hover {
+    opacity: 0.8;
+}
+
+.salario-total-input {
+    width: 100px;
+    padding: 5px;
+    text-align: right;
+}
+#doc-vacaciones-tomadas-section {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+#doc-vacaciones-tomadas-grid {
+    width: 100%;
+    overflow-x: auto;
+}
+
+#doc-vacaciones-tomadas-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#doc-vacaciones-tomadas-table th, #doc-vacaciones-tomadas-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+#doc-vacaciones-tomadas-table th {
+    background-color: #3498db;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+#doc-vacaciones-tomadas-table tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+/* Responsive design para el DataGridView */
+@media screen and (max-width: 1200px) {
+    #doc-vacaciones-tomadas-table {
+        font-size: 14px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    #doc-vacaciones-tomadas-table {
+        font-size: 12px;
+    }
+}
+#doc-vacaciones-tomadas-section .search-container {
+    margin-bottom: 20px;
+}
+
+#doc-vacaciones-search {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+#anniversary-employees-section {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+#anniversary-employees-section h2 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+#anniversary-employees-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+#anniversary-employees-table th,
+#anniversary-employees-table td {
+    padding: 15px;
+    text-align: left;
+}
+
+#anniversary-employees-table th {
+    background-color: #3498db;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+#anniversary-employees-table tbody tr:hover {
+    background-color: #f5f5f5;
+}
+#anniversary-employees-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+#anniversary-employees-table td {
+    border-bottom: 1px solid #ddd;
+}
+
+#anniversary-employees-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.days-remaining {
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+.days-accumulated {
+    font-weight: bold;
+    color: #27ae60;
+}
+
+@media screen and (max-width: 768px) {
+    #anniversary-employees-table {
+        font-size: 14px;
+    }
+    
+    #anniversary-employees-table th,
+    #anniversary-employees-table td {
+        padding: 10px;
+    }
+}
+/* Estilos para la sección de Historial por Departamento */
+#historial-por-departamento-section {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.combobox-container {
+    margin-bottom: 20px;
+}
+
+#departamento-select {
+    width: 48%;
+    padding: 8px;
+    font-size: 16px;
+    border: 2px solid #3498db;
+    border-radius: 20px;
+    background-color: #fff;
+    outline: none;
+}
+
+.grid-container {
+    overflow-x: auto;
+}
+
+#empleados-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+}
+
+#empleados-table th,
+#empleados-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+#empleados-table th {
+    background-color: #ff9800; /* Naranja elegante */
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+#empleados-table tbody tr:nth-child(even) {
+    background-color: #fff3e0; /* Naranja claro para filas alternadas */
+}
+
+#empleados-table tbody tr:hover {
+    background-color: #ffe0b2; /* Naranja más claro al pasar el mouse */
+}
+#reporte-pagos-section {
+    width: 100%;
+    overflow-x: auto;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#estado-pago-select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+@media screen and (max-width: 1200px) {
+    #reporte-pagos-table {
+        font-size: 12px;
+    }
+}
+
+#reporte-pagos-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+#reporte-pagos-table th, #reporte-pagos-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#reporte-pagos-table th {
+    background-color: #f8a13f;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+#reporte-pagos-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+#reporte-pagos-table tr:hover {
+    background-color: #f5f5f5;
+}
+
+#reporte-pagos-table td {
+    max-width: 150px; /* Ajusta este valor según tus necesidades */
+}
+#reporte-pagos-table td:nth-child(1), /* ID */
+#reporte-pagos-table td:nth-child(3), /* Fecha Registro */
+#reporte-pagos-table td:nth-child(4) { /* Días Solicitados */
+    max-width: 80px;
+}
+#reporte-pagos-table td:nth-child(2) { /* Nombre Completo */
+    max-width: 200px;
+}
+#reporte-pagos-container {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 15px;
+}
+#reporte-pagos-table tbody tr:nth-child(even) {
+    background-color: #fff3e0; /* Naranja claro para filas alternadas */
+}
+
+#reporte-pagos-table tbody tr:hover {
+    background-color: #ffe0b2; /* Naranja más claro al pasar el mouse */
+}
+#reporte-pagos-table td:hover::after {
+    content: attr(title);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    z-index: 1;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+}
+#reporte-vacaciones-section {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+#reporte-vacaciones-grid {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+.date-range-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 20px;
+}
+
+.date-input {
+    display: flex;
+    flex-direction: column;
+}
+
+.date-input label {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.date-input input[type="date"] {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.btn-generar {
+    background-color: #ff9800;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-generar:hover {
+    background-color: #f57c00;
+}
+
+#reporte-vacaciones-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: #fff;
+}
+
+#reporte-vacaciones-table th,
+#reporte-vacaciones-table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+#reporte-vacaciones-table th {
+    background-color: #ff9800;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+#reporte-vacaciones-table tbody tr:nth-child(even) {
+    background-color: #fff3e0;
+}
+
+#reporte-vacaciones-table tbody tr:hover {
+    background-color: #ffe0b2;
+}
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Mejoras en la apariencia de las tablas */
+#reporte-vacaciones-table,
+#detalle-vacaciones-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#reporte-vacaciones-table th,
+#reporte-vacaciones-table td,
+#detalle-vacaciones-table th,
+#detalle-vacaciones-table td {
+    padding: 12px 15px;
+    text-align: left;
+}
+
+#reporte-vacaciones-table th,
+#detalle-vacaciones-table th {
+    background-color: #ff9800;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#reporte-vacaciones-table tbody tr:nth-child(even),
+#detalle-vacaciones-table tbody tr:nth-child(even) {
+    background-color: #fff3e0;
+}
+
+#reporte-vacaciones-table tbody tr:hover,
+#detalle-vacaciones-table tbody tr:hover {
+    background-color: #ffe0b2;
+    transition: background-color 0.3s ease;
+}
+
+#reporte-vacaciones-table tbody tr,
+#detalle-vacaciones-table tbody tr {
+    cursor: pointer;
+}
+
+/* Estilo para el párrafo de información del empleado */
+#detalle-empleado-info {
+    background-color: #f5f5f5;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+.dias-disponibles {
+    text-align: center;
+    font-weight: bold;
+}
+.custom-select {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    padding: 10px 15px;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #333;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%23333' d='M0 2l4 4 4-4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 8px 8px;
+    border: 2px solid #1985dd;
+    border-radius: 5px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.custom-select:focus {
+    border-color: #1985dd;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(242, 99, 28, 0.25);
+}
+
+.custom-select:hover {
+    border-color: #1985dd;
+}
+#pagos-autorizados-section {
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+#pagos-autorizados-section h2 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.filter-container {
+    margin-bottom: 20px;
+}
+
+#departamento-filter-pagos-autorizados {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+#pagos-autorizados-grid {
+    overflow-x: auto;
+}
+
+#pagos-autorizados-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: #fff;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#pagos-autorizados-table th,
+#pagos-autorizados-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+#pagos-autorizados-table th {
+    background-color: #F2631C;
+    color: #fff;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+#pagos-autorizados-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+#pagos-autorizados-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+#pagos-autorizados-table input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+#pagos-autorizados-table .finalizar-pago-button {
+    background-color: #14e65a;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#pagos-autorizados-table .finalizar-pago-button:hover {
+    background-color: #F2631C;
+}
+
+@media screen and (max-width: 1200px) {
+    #pagos-autorizados-table {
+        font-size: 14px;
+    }
+    
+    #pagos-autorizados-table th,
+    #pagos-autorizados-table td {
+        padding: 10px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    #pagos-autorizados-table {
+        font-size: 12px;
+    }
+    
+    #pagos-autorizados-table th,
+    #pagos-autorizados-table td {
+        padding: 8px;
+    }
+}
