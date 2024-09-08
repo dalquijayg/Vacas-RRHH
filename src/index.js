@@ -8,8 +8,7 @@ const path = require('path');
 const {autoUpdater, AppUpdater} = require('electron-updater')
 const log = require('electron-log')
 log.transports.file.resolvePathFn =()=> path.join('C:/Users/Dennis/Desktop/Vacas RRHH', 'logs/main.log');
-log.info('Hola, log');
-log.warn('prueba');
+log.log("Version de la App "+ app.getVersion())
 let mainWindow;
 
 app.on('ready', () => {
@@ -27,14 +26,15 @@ app.on('ready', () => {
 });
 
 autoUpdater.on("update-available",()=>{
-    log.info("update-available")
+    log.info("update available")
 })
 
 autoUpdater.on("checking-for-update",()=>{
-    log.info("checking-for-update")
+    log.info("checking for update")
 })
-autoUpdater.on("download-progress",()=>{
-    log.info("download-progress")
+autoUpdater.on("download-progress",(progressTrack)=>{
+    log.info("\n\ndownload-progress")
+log.info(progressTrack)
 })
 autoUpdater.on("update-dowloaded",()=>{
     log.info("update-dowloaded")
