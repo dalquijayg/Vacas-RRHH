@@ -423,8 +423,8 @@ document.addEventListener('DOMContentLoaded', async() => {
                         planillas.Nombre_Planilla,
                         personal.Id_Planilla,
                         personal.Id_Departamento, 
-                        puestos.DiasMinVT, 
-                        puestos.DiasMinVP
+                        personal.DiasMinVT, 
+                        personal.DiasMinVP
                     FROM 
                         personal 
                         INNER JOIN puestos ON personal.Id_Puesto = puestos.Id_Puesto
@@ -464,8 +464,8 @@ document.addEventListener('DOMContentLoaded', async() => {
                         planillas.Nombre_Planilla,
                         personal.Id_Planilla,
                         personal.Id_Departamento, 
-                        puestos.DiasMinVT, 
-                        puestos.DiasMinVP
+                        personal.DiasMinVT, 
+                        personal.DiasMinVP
                     FROM
                         personal
                         INNER JOIN puestos ON personal.Id_Puesto = puestos.Id_Puesto
@@ -507,8 +507,8 @@ document.addEventListener('DOMContentLoaded', async() => {
                         planillas.Nombre_Planilla,
                         personal.Id_Planilla,
                         personal.Id_Departamento, 
-                        puestos.DiasMinVT, 
-                        puestos.DiasMinVP
+                        personal.DiasMinVT, 
+                        personal.DiasMinVP
                     FROM
                         personal
                         INNER JOIN puestos ON personal.Id_Puesto = puestos.Id_Puesto
@@ -550,8 +550,8 @@ document.addEventListener('DOMContentLoaded', async() => {
                         planillas.Nombre_Planilla, 
                         personal.Id_Planilla, 
                         personal.Id_Departamento, 
-                        puestos.DiasMinVT, 
-                        puestos.DiasMinVP
+                        personal.DiasMinVT, 
+                        personal.DiasMinVP
                     FROM
                         personal
                         INNER JOIN
@@ -760,7 +760,7 @@ document.addEventListener('DOMContentLoaded', async() => {
                     personal.Id_Departamento, 
                     personal.Inicio_Planilla,
                     CONCAT(personal.Primer_Nombre, ' ', IFNULL(personal.Segundo_Nombre, ''), ' ', personal.Primer_Apellido, ' ', IFNULL(personal.Segundo_Apellido, '')) AS NombreCompleto,
-                    p.DiasMinVP
+                    personal.DiasMinVP
                 FROM personal
                 INNER JOIN puestos p ON personal.Id_Puesto = p.Id_Puesto
                 WHERE personal.Id = ?
@@ -1088,13 +1088,13 @@ document.addEventListener('DOMContentLoaded', async() => {
             const query = `
                 SELECT 
                     IFNULL(SUM(vt.DiasSolicitado), 0) + IFNULL(SUM(vp.DiasSolicitado), 0) AS DiasTomados,
-                    p.DiasMinVT
+                    pe.DiasMinVT
                 FROM personal pe
                 INNER JOIN puestos p ON pe.Id_Puesto = p.Id_Puesto
                 LEFT JOIN vacacionestomadas vt ON pe.Id = vt.IdPersonal AND vt.Periodo = ?
                 LEFT JOIN vacacionespagadas vp ON pe.Id = vp.IdPersonal AND vp.Periodo = ? AND vp.Estado IN (1,2,3)
                 WHERE pe.Id = ?
-                GROUP BY pe.Id, p.DiasMinVT
+                GROUP BY pe.Id, pe.DiasMinVT
             `;
             const result = await connection.query(query, [periodo, periodo, employeeId]);
             await connection.close();
@@ -1159,28 +1159,29 @@ document.addEventListener('DOMContentLoaded', async() => {
             const connection = await odbc.connect(conexion);
             let remainingDays = totalDays;
             let currentDate = new Date(start);
-
+    
             const periodo = await getPeriodoVacaciones(selectedEmployeeInicioPlanilla, selectedEmployeeId);
             
             if (!periodo) {
                 throw new Error('No se pudo determinar el período de vacaciones');
             }
-
+    
             const vacationInfo = await getVacationInfo(selectedEmployeeId, periodo);
             const totalDiasTomados = vacationInfo.DiasTomados + totalDays;
             const diasMinimos = selectedEmployeeDiasMinVT;
-
-            if (totalDiasTomados < 15 * 0.5 && totalDays < diasMinimos) {
+    
+            // Modificamos esta parte para incluir la nueva condición
+            if (diasMinimos > 1 && totalDiasTomados < 15 * 0.5 && totalDays < diasMinimos) {
                 throw new Error(`Debe seleccionar al menos ${diasMinimos} días de vacaciones.`);
             }
-
+    
             while (remainingDays > 0) {
                 const periodo = await getPeriodoVacaciones(selectedEmployeeInicioPlanilla, selectedEmployeeId);
                 
                 if (!periodo) {
                     throw new Error('No se pudo determinar el período de vacaciones');
                 }
-
+    
                 // Obtener los días ya usados en este período
                 const [periodoInicio, periodoFin] = periodo.split(' al ');
                 const queryDiasUsados = `
@@ -1194,13 +1195,13 @@ document.addEventListener('DOMContentLoaded', async() => {
                 const resultDiasUsados = await connection.query(queryDiasUsados, [periodo, selectedEmployeeId, periodo, selectedEmployeeId]);
                 const diasUsados = resultDiasUsados[0].DiasUsados;
                 const diasDisponibles = 15 - diasUsados;
-
+    
                 const diasAGuardar = Math.min(remainingDays, diasDisponibles);
-
+    
                 // Guardar cada fecha individual
                 for (let i = 0; i < diasAGuardar; i++) {
                     if (currentDate >= end) break;
-
+    
                     if (!esFechaNoValida(currentDate)) {
                         const query = `
                             INSERT INTO vacacionestomadas 
@@ -1221,15 +1222,15 @@ document.addEventListener('DOMContentLoaded', async() => {
                     currentDate.setDate(currentDate.getDate() + 1);
                 }
             }
-
+    
             await connection.close();
-
+    
             Swal.fire({
                 icon: 'success',
                 title: 'Vacaciones guardadas',
                 text: 'Las vacaciones han sido registradas correctamente.',
             });
-
+    
             // Actualizar la lista de empleados y el calendario
             await updateEmployeeInfo(selectedEmployeeId);
             await loadEmployeeList();
@@ -1664,7 +1665,7 @@ document.addEventListener('DOMContentLoaded', async() => {
 
                 try {
                     const periodo = await getPeriodoVacaciones(selectedEmployeeInicioPlanilla, selectedEmployeeId);
-        
+
                     const connection = await odbc.connect(conexion);
                     const queryDiasUsados = `
                         SELECT 
@@ -1686,23 +1687,25 @@ document.addEventListener('DOMContentLoaded', async() => {
                     const diasTotalesUsados = vacationInfo.DiasTomados + vacationInfo.DiasPagados;
                     const diasDisponibles = 15 - diasTotalesUsados;
 
-                    if (diasTotalesUsados >= 7.5) { // Más del 50% de los días ya utilizados
-                        if (days < diasDisponibles) {
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Días insuficientes',
-                                text: `Debe seleccionar todos los ${diasDisponibles} días restantes del periodo.`,
-                            });
-                            return;
-                        }
-                    } else {
-                        if (days < selectedEmployeeDiasMinVT) {
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Días insuficientes',
-                                text: `Debe seleccionar al menos ${selectedEmployeeDiasMinVT} días de vacaciones.`,
-                            });
-                            return;
+                    if (selectedEmployeeDiasMinVT > 1) {  // Añadimos esta condición
+                        if (diasTotalesUsados >= 7.5) { // Más del 50% de los días ya utilizados
+                            if (days < diasDisponibles) {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Días insuficientes',
+                                    text: `Debe seleccionar todos los ${diasDisponibles} días restantes del periodo.`,
+                                });
+                                return;
+                            }
+                        } else {
+                            if (days < selectedEmployeeDiasMinVT) {
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Días insuficientes',
+                                    text: `Debe seleccionar al menos ${selectedEmployeeDiasMinVT} días de vacaciones.`,
+                                });
+                                return;
+                            }
                         }
                     }
 
