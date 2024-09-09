@@ -11,7 +11,8 @@ async function verificarDPI(dpi) {
                                                     CONCAT(personal.Primer_Nombre, ' ', IFNULL(personal.Segundo_Nombre, ''), ' ', personal.Primer_Apellido, ' ', IFNULL(personal.Segundo_Apellido, '')) AS NombreCompleto, 
                                                     personal.Id_Departamento, 
                                                     departamentos.Nombre, 
-                                                    puestos_general.Id_Puesto
+                                                    puestos_general.Id_Puesto,
+                                                    personal.PIN
                                                 FROM
                                                     personal
                                                     INNER JOIN
@@ -30,12 +31,9 @@ async function verificarDPI(dpi) {
                                                     No_DPI = ?`, [dpi]);
         await connection.close();
         if (result.length > 0) {
-            // Guardar datos en sessionStorage
-            const userData = result[0];
-            sessionStorage.setItem('userData', JSON.stringify(userData));
-            return true;
+            return result[0];
         } else {
-            return false;
+            return null;
         }
     } catch (error) {
         console.error('Error de conexión o consulta:', error);
@@ -59,9 +57,33 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
     const dpi = document.getElementById('dpi').value;
 
     try {
-        const existe = await verificarDPI(dpi);
-        if (existe) {
-            window.location.href = path.join(__dirname, 'Home.html'); // Cambia la ruta según sea necesario
+        const userData = await verificarDPI(dpi);
+        if (userData) {
+            // Mostrar campo para ingresar PIN
+            Swal.fire({
+                title: 'Ingrese su PIN',
+                input: 'password',
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                showCancelButton: true,
+                confirmButtonText: 'Verificar',
+                showLoaderOnConfirm: true,
+                preConfirm: (pin) => {
+                    if (pin === userData.PIN) {
+                        sessionStorage.setItem('userData', JSON.stringify(userData));
+                        return true;
+                    } else {
+                        Swal.showValidationMessage('PIN incorrecto');
+                        return false;
+                    }
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = path.join(__dirname, 'Home.html');
+                }
+            });
         } else {
             Swal.fire({
                 icon: 'error',
