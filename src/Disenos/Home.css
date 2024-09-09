@@ -341,40 +341,45 @@ button:hover {
 }
 /* Estilos mejorados para el DataGridView */
 #vacation-section {
-    max-width: 1200px;
+    max-width: 100%; /* Cambiamos de 1200px a 100% */
     margin: 20px auto;
+    padding: 20px;
+    box-sizing: border-box; /* Asegura que el padding no aumente el ancho total */
 }
 
 #employee-list {
     width: 100%;
     margin-bottom: 20px;
+    overflow-x: auto; 
 }
 
 #employee-table {
     width: 100%;
+    table-layout: auto; /* Permite que las columnas se ajusten al contenido */
     border-collapse: separate;
     border-spacing: 0;
-    background-color: #fff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    overflow: hidden; 
-    table-layout: auto;
 }
-
+#employee-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 1; /* Asegura que el encabezado esté por encima del contenido al hacer scroll */
+    background-color: #F2631C; /* Color de fondo del encabezado */
+}
 #employee-table th, #employee-table td {
     padding: 12px;
     text-align: left;
-    white-space: nowrap;
+    white-space: nowrap; /* Evita que el texto se rompa en múltiples líneas */
     overflow: hidden;
-    text-overflow: ellipsis;
+    text-overflow: ellipsis; /* Muestra '...' si el contenido es muy largo */
 }
 
 #employee-table th {
-    background-color: #C2631F;
+    background-color: #F2631C; /* Asegúrate de que coincida con el color de fondo del thead */
     color: white;
     font-weight: bold;
-    text-transform: uppercase;
-    text-align: center; 
+    padding: 12px;
+    text-align: left;
+    border-bottom: 2px solid #e67e22; /* Línea divisoria bajo el encabezado */
 }
 
 #employee-table td {
@@ -428,13 +433,27 @@ button:hover {
 }
 #employee-table th:nth-child(1),
 #employee-table td:nth-child(1) {
-    width: auto;
-    min-width: 200px; /* Ajusta esto según tus necesidades */
+    width: 20%; /* Nombre Completo */
 }
 #employee-table th:nth-child(2),
 #employee-table td:nth-child(2) {
-    width: auto;
-    min-width: 100px;
+    width: 10%; /* Inicio en Planilla */
+}
+#employee-table th:nth-child(3),
+#employee-table td:nth-child(3) {
+    width: 10%; /* Días Disponibles */
+}
+#employee-table th:nth-child(4),
+#employee-table td:nth-child(4) {
+    width: 20%; /* Puesto */
+}
+#employee-table th:nth-child(5),
+#employee-table td:nth-child(5) {
+    width: 20%; /* Departamento */
+}
+#employee-table th:nth-child(6),
+#employee-table td:nth-child(6) {
+    width: 20%; /* Planilla */
 }
 #employee-table td.dias-disponibles {
     text-align: center;
@@ -673,13 +692,17 @@ button:hover {
 
 /* Responsive design para el DataGridView */
 @media screen and (max-width: 1200px) {
-    #pago-vacaciones-table {
-        font-size: 14px;
+    #employee-table {
+        font-size: 14px; /* Reducimos el tamaño de fuente en pantallas más pequeñas */
+    }
+    
+    #employee-table th,
+    #employee-table td {
+        padding: 8px; /* Reducimos el padding en pantallas más pequeñas */
     }
 }
-
 @media screen and (max-width: 768px) {
-    #pago-vacaciones-table {
+    #employee-table {
         font-size: 12px;
     }
 }
@@ -790,12 +813,9 @@ button:hover {
     border-radius: 4px;
 }
 #anniversary-employees-section {
-    max-width: 1200px;
+    max-width: 100%;
     margin: 20px auto;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 0 20px;
 }
 #anniversary-employees-section h2 {
     color: #2c3e50;
@@ -807,12 +827,13 @@ button:hover {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    background-color: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
-
+#anniversary-employees-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: #3498db;
+}
 #anniversary-employees-table th,
 #anniversary-employees-table td {
     padding: 15px;
@@ -823,23 +844,48 @@ button:hover {
     background-color: #3498db;
     color: white;
     font-weight: bold;
-    text-transform: uppercase;
-    font-size: 14px;
-    letter-spacing: 0.5px;
+    padding: 15px;
+    text-align: left;
+    border-bottom: 2px solid #2980b9;
 }
 
+
 #anniversary-employees-table tbody tr:hover {
-    background-color: #f5f5f5;
+    background-color: #e8f4f8;
 }
 #anniversary-employees-table tbody tr:nth-child(even) {
-    background-color: #f2f2f2;
+    background-color: #f9f9f9;
 }
 #anniversary-employees-table td {
-    border-bottom: 1px solid #ddd;
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 #anniversary-employees-table tbody tr:last-child td {
     border-bottom: none;
+}
+#anniversary-employees-table .center-align {
+    text-align: center;
+}
+
+#anniversary-employees-table th:nth-child(3),
+#anniversary-employees-table th:nth-child(4),
+#anniversary-employees-table th:nth-child(5) {
+    text-align: center;
+}
+
+#anniversary-employees-table .days-remaining,
+#anniversary-employees-table .days-accumulated {
+    font-weight: bold;
+    text-align: center;
+}
+
+#anniversary-employees-table .days-remaining {
+    color: #e74c3c;
+}
+
+#anniversary-employees-table .days-accumulated {
+    color: #27ae60;
 }
 
 .days-remaining {
@@ -855,6 +901,16 @@ button:hover {
 @media screen and (max-width: 768px) {
     #anniversary-employees-table {
         font-size: 14px;
+    }
+    
+    #anniversary-employees-table th,
+    #anniversary-employees-table td {
+        padding: 10px;
+    }
+}
+@media screen and (max-width: 768px) {
+    .table-container {
+        max-height: 80vh;
     }
     
     #anniversary-employees-table th,

@@ -64,12 +64,24 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
                 title: 'Ingrese su PIN',
                 input: 'password',
                 inputAttributes: {
-                    autocapitalize: 'off'
+                    autocapitalize: 'off',
+                    maxlength: 6,
+                    inputmode: 'numeric',
+                    pattern: '[0-9]*'
                 },
                 showCancelButton: true,
                 confirmButtonText: 'Verificar',
                 showLoaderOnConfirm: true,
                 preConfirm: (pin) => {
+                    // Validar que el PIN sea numérico y tenga la longitud correcta
+                    if (!/^\d+$/.test(pin)) {
+                        Swal.showValidationMessage('El PIN debe contener solo números');
+                        return false;
+                    }
+                    if (pin.length !== 6) {
+                        Swal.showValidationMessage('El PIN debe tener 6 dígitos');
+                        return false;
+                    }
                     if (pin === userData.PIN) {
                         sessionStorage.setItem('userData', JSON.stringify(userData));
                         return true;

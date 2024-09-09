@@ -1604,7 +1604,7 @@ document.addEventListener('DOMContentLoaded', async() => {
                 const date = info.date;
                 const dayOfWeek = date.getDay();
     
-                if (dayOfWeek === 0) {
+                if (dayOfWeek === 0 || dayOfWeek === 6) {
                     info.el.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
                 }
     
@@ -1628,26 +1628,34 @@ document.addEventListener('DOMContentLoaded', async() => {
             selectAllow: function(selectInfo) {
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
-            
+
                 const isAfterToday = selectInfo.start >= today || permiso001;
                 const isStartValid = !esFechaNoValida(selectInfo.start);
-                const isEndValid = !esFechaNoValida(selectInfo.end);
+                let isEndValid = true;
+
+                // Verificar si es una selección de un solo día
+                const isSingleDaySelection = selectInfo.start.getTime() === selectInfo.end.getTime() - 86400000;
+
+                if (!isSingleDaySelection) {
+                    // Para selecciones de múltiples días, ajustar si termina en sábado
+                    if (selectInfo.end.getDay() === 6) {
+                        selectInfo.end = new Date(selectInfo.end.getTime() - 86400000);
+                    }
+                    isEndValid = !esFechaNoValida(new Date(selectInfo.end.getTime() - 86400000));
+                }
+
                 const isNotVacationStart = !esFechaVacaciones(selectInfo.start, vacationDates);
-                const isNotVacationEnd = !esFechaVacaciones(new Date(selectInfo.end.getTime() - 1), vacationDates);
-            
-                // Permitir sábados (día 6 de la semana en JavaScript)
-                const isSaturday = selectInfo.start.getDay() === 6;
-            
+                const isNotVacationEnd = !esFechaVacaciones(new Date(selectInfo.end.getTime() - 86400000), vacationDates);
+
                 console.log('Fecha seleccionada:', selectInfo.start);
                 console.log('Es después de hoy:', isAfterToday);
                 console.log('Inicio válido:', isStartValid);
                 console.log('Fin válido:', isEndValid);
                 console.log('No es vacación (inicio):', isNotVacationStart);
                 console.log('No es vacación (fin):', isNotVacationEnd);
-                console.log('Es sábado:', isSaturday);
-            
-                // Permitir la selección si es sábado o si cumple con las otras condiciones
-                return (isSaturday || (isAfterToday && isStartValid && isEndValid && isNotVacationStart && isNotVacationEnd));
+                console.log('Es selección de un solo día:', isSingleDaySelection);
+
+                return isAfterToday && isStartValid && isEndValid && isNotVacationStart && isNotVacationEnd;
             },
             select: async function(info) {
                 const start = info.start;
@@ -1817,7 +1825,7 @@ document.addEventListener('DOMContentLoaded', async() => {
         const isFestivo = FechaFestivos.some(festivo => 
             festivo.month === date.getMonth() && festivo.day === date.getDate()
         );
-        return dayOfWeek === 0 || isFestivo || esSemanaSanta(date); // Sigue igual, los sábados (6) no se consideran no válidos
+        return dayOfWeek === 0 || dayOfWeek === 6 || isFestivo || esSemanaSanta(date); // Sigue igual, los sábados (6) no se consideran no válidos
     }
 
     function contarDiasValidos(start, end) {
@@ -2325,22 +2333,27 @@ document.addEventListener('DOMContentLoaded', async() => {
     }
     
     function showAnniversaryEmployees(employees) {
+        // Ocultar el saludo
+        document.querySelector('.saludo-card').style.display = 'none';
+    
+        // Mostrar la sección de empleados próximos a aniversario
         const anniversarySection = document.getElementById('anniversary-employees-section');
-        const tableBody = anniversarySection.querySelector('tbody');
-        tableBody.innerHTML = '';
+        anniversarySection.style.display = 'block';
+    
+        const tableBody = document.querySelector('#anniversary-employees-table tbody');
+        tableBody.innerHTML = ''; // Limpiar el contenido existente
     
         employees.forEach(employee => {
             const row = tableBody.insertRow();
-            row.insertCell(0).textContent = employee.NombreCompleto;
-            row.insertCell(1).textContent = employee.NombreDepartamento;
-            row.insertCell(2).textContent = formatofecha(employee.Inicio_Planilla);
-            row.insertCell(3).textContent = employee.DiasRestantes;
-            row.insertCell(4).textContent = employee.DiasDisponibles;
+            row.innerHTML = `
+                <td>${employee.NombreCompleto}</td>
+                <td>${employee.NombreDepartamento}</td>
+                <td class="center-align">${formatofecha(employee.Inicio_Planilla)}</td>
+                <td class="days-remaining center-align">${employee.DiasRestantes}</td>
+                <td class="days-accumulated center-align">${employee.DiasDisponibles}</td>
+            `;
         });
-    
-        anniversarySection.style.display = 'block';
-        document.querySelector('.saludo-card').style.display = 'none';
-    }
+    }   
     async function departamentostodos() {
         try {
             const connection = await conectar();
