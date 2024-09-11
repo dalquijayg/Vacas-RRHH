@@ -711,7 +711,7 @@ document.addEventListener('DOMContentLoaded', async() => {
             });
         }
     }
-    async function updateEmployeeInfo(employeeId) {
+    async function updateEmployeeInfo(employeeId, periodo) {
         try {
             const connection = await conectar();
             const query = `
@@ -741,7 +741,7 @@ document.addEventListener('DOMContentLoaded', async() => {
             if (result.length > 0) {
                 selectedEmployeeName = result[0].NombreCompleto;
                 selectedEmployeeDays = result[0].DiasDisponibles;
-                document.getElementById('selected-employee-info').textContent = `${selectedEmployeeName} - Días disponibles: ${selectedEmployeeDays}`;
+                document.getElementById('selected-employee-info').textContent = `${selectedEmployeeName} - Días disponibles: ${selectedEmployeeDays} - Período: ${periodo}`;
             }
         } catch (error) {
             console.error('Error updating employee info:', error);
@@ -1060,7 +1060,7 @@ document.addEventListener('DOMContentLoaded', async() => {
         diasDisponibles.textContent = parseInt(diasDisponibles.textContent) + diferencia;
     }
 
-    function selectEmployee(row, employeeId, employeeName, employeeDays, employeePlanilla, employeeDepartamento, employeeInicioPlanilla, employeeDiasMinVT) {
+    async function selectEmployee(row, employeeId, employeeName, employeeDays, employeePlanilla, employeeDepartamento, employeeInicioPlanilla, employeeDiasMinVT) {
         const allRows = document.querySelectorAll('#employee-table tbody tr');
         allRows.forEach(r => r.classList.remove('selected'));
         row.classList.add('selected');
@@ -1071,16 +1071,20 @@ document.addEventListener('DOMContentLoaded', async() => {
         selectedEmployeeDepartamento = employeeDepartamento;
         selectedEmployeeInicioPlanilla = employeeInicioPlanilla;
         selectedEmployeeDiasMinVT = employeeDiasMinVT;
-        updateEmployeeInfo(employeeId);
-
+    
+        // Calcular el período de vacaciones
+        const periodo = await getPeriodoVacaciones(selectedEmployeeInicioPlanilla, selectedEmployeeId);
+        
+        updateEmployeeInfo(employeeId, periodo);
+    
         employeeListToggle.classList.add('collapsed');
         employeeList.classList.add('collapsed');
         calendarContainer.style.display = 'block';
         calendarContainer.scrollIntoView({ behavior: 'smooth' });
         
         document.getElementById('calendar-container').style.display = 'block';
-        document.getElementById('selected-employee-info').textContent = `${selectedEmployeeName} - Días disponibles: ${selectedEmployeeDays}`;
-        initializeCalendar();
+        document.getElementById('selected-employee-info').textContent = `${selectedEmployeeName} - Días disponibles: ${selectedEmployeeDays} - Período: ${periodo}`;
+        initializeCalendar(periodo);
     }
     async function getVacationInfo(employeeId, periodo) {
         try {
@@ -1110,45 +1114,53 @@ document.addEventListener('DOMContentLoaded', async() => {
         try {
             const connection = await odbc.connect(conexion);
             
-            const calcularSiguientePeriodo = (fecha) => {
-                const fechaInicio = new Date(fecha);
-                const fechaFin = new Date(fecha);
-                fechaFin.setFullYear(fechaFin.getFullYear() + 1);
-                fechaFin.setDate(fechaFin.getDate() - 1);
-                return `${fechaInicio.toISOString().split('T')[0]} al ${fechaFin.toISOString().split('T')[0]}`;
-            };
+            const query = `
+                SELECT 
+                    CONCAT(
+                        DATE_FORMAT(p.FechaInicio, '%Y-%m-%d'), 
+                        ' al ', 
+                        DATE_FORMAT(DATE_ADD(p.FechaInicio, INTERVAL 1 YEAR) - INTERVAL 1 DAY, '%Y-%m-%d')
+                    ) AS Periodo,
+                    COALESCE(
+                        (SELECT SUM(DiasSolicitado)
+                         FROM vacacionespagadas
+                         WHERE IdPersonal = ? 
+                           AND Periodo = CONCAT(DATE_FORMAT(p.FechaInicio, '%Y-%m-%d'), ' al ', DATE_FORMAT(DATE_ADD(p.FechaInicio, INTERVAL 1 YEAR) - INTERVAL 1 DAY, '%Y-%m-%d'))
+                        ), 0
+                    ) +
+                    COALESCE(
+                        (SELECT SUM(DiasSolicitado)
+                         FROM vacacionestomadas
+                         WHERE IdPersonal = ? 
+                           AND Periodo = CONCAT(DATE_FORMAT(p.FechaInicio, '%Y-%m-%d'), ' al ', DATE_FORMAT(DATE_ADD(p.FechaInicio, INTERVAL 1 YEAR) - INTERVAL 1 DAY, '%Y-%m-%d'))
+                        ), 0
+                    ) AS DiasUsados
+                FROM 
+                    (
+                        SELECT DATE_ADD(STR_TO_DATE(?, '%Y-%m-%d'), INTERVAL n YEAR) AS FechaInicio
+                        FROM (
+                            SELECT a.N + b.N * 10 + c.N * 100 AS n
+                            FROM (SELECT 0 AS N UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) a
+                            CROSS JOIN (SELECT 0 AS N UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) b
+                            CROSS JOIN (SELECT 0 AS N UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) c
+                        ) as nums
+                    ) AS p
+                HAVING DiasUsados < 15
+                ORDER BY p.FechaInicio
+                LIMIT 1
+            `;
     
-            let periodoActual = calcularSiguientePeriodo(inicioPlanilla);
-            let periodoEncontrado = false;
-    
-            while (!periodoEncontrado) {
-                const query = `
-                    SELECT 
-                        ? AS Periodo,
-                        IFNULL(SUM(CASE WHEN vp.IdPersonal = ? THEN vp.DiasSolicitado ELSE 0 END), 0) +
-                        IFNULL(SUM(CASE WHEN vt.IdPersonal = ? THEN vt.DiasSolicitado ELSE 0 END), 0) AS DiasUsados
-                    FROM 
-                        (SELECT ? AS Periodo) AS temp
-                    LEFT JOIN vacacionespagadas vp ON vp.Periodo = temp.Periodo 
-                    LEFT JOIN vacacionestomadas vt ON vt.Periodo = temp.Periodo
-                `;
-                const result = await connection.query(query, [periodoActual, idPersonal, idPersonal, periodoActual]);
-                
-                if (result[0].DiasUsados < 15) {
-                    periodoEncontrado = true;
-                } else {
-                    const [fechaInicio] = periodoActual.split(' al ');
-                    const siguienteFechaInicio = new Date(fechaInicio);
-                    siguienteFechaInicio.setFullYear(siguienteFechaInicio.getFullYear() + 1);
-                    periodoActual = calcularSiguientePeriodo(siguienteFechaInicio.toISOString().split('T')[0]);
-                }
-            }
-    
+            const result = await connection.query(query, [idPersonal, idPersonal, inicioPlanilla]);
             await connection.close();
-            return periodoActual;
+    
+            if (result.length > 0) {
+                return result[0].Periodo;
+            } else {
+                throw new Error('No se pudo determinar el período de vacaciones');
+            }
         } catch (error) {
             console.error('Error getting vacation period:', error);
-            return null;
+            throw error;
         }
     }
 
@@ -1722,6 +1734,7 @@ document.addEventListener('DOMContentLoaded', async() => {
                         message = `
                             <p>Fecha: ${start.toLocaleDateString('es-ES')}</p>
                             <p>Días solicitados: 1</p>
+                            <p>Período: ${periodo}</p>
                         `;
                     } else {
                         const endDate = new Date(end.getTime() - 1);
@@ -1729,6 +1742,7 @@ document.addEventListener('DOMContentLoaded', async() => {
                             <p>Fecha de inicio: ${start.toLocaleDateString('es-ES')}</p>
                             <p>Fecha de fin: ${endDate.toLocaleDateString('es-ES')}</p>
                             <p>Días solicitados: ${days}</p>
+                            <p>Período: ${periodo}</p>
                         `;
                     }
 
