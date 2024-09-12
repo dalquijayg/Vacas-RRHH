@@ -741,7 +741,7 @@ document.addEventListener('DOMContentLoaded', async() => {
             if (result.length > 0) {
                 selectedEmployeeName = result[0].NombreCompleto;
                 selectedEmployeeDays = result[0].DiasDisponibles;
-                document.getElementById('selected-employee-info').textContent = `${selectedEmployeeName} - Días disponibles: ${selectedEmployeeDays} - Período: ${periodo}`;
+                document.getElementById('selected-employee-info').textContent = `${selectedEmployeeName} - Días disponibles: ${selectedEmployeeDays}`;
             }
         } catch (error) {
             console.error('Error updating employee info:', error);
@@ -1083,7 +1083,7 @@ document.addEventListener('DOMContentLoaded', async() => {
         calendarContainer.scrollIntoView({ behavior: 'smooth' });
         
         document.getElementById('calendar-container').style.display = 'block';
-        document.getElementById('selected-employee-info').textContent = `${selectedEmployeeName} - Días disponibles: ${selectedEmployeeDays} - Período: ${periodo}`;
+        document.getElementById('selected-employee-info').textContent = `${selectedEmployeeName} - Días disponibles: ${selectedEmployeeDays}`;
         initializeCalendar(periodo);
     }
     async function getVacationInfo(employeeId, periodo) {
