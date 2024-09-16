@@ -1616,7 +1616,7 @@ document.addEventListener('DOMContentLoaded', async() => {
                 const date = info.date;
                 const dayOfWeek = date.getDay();
     
-                if (dayOfWeek === 0 || dayOfWeek === 6) {
+                if (dayOfWeek === 0) {
                     info.el.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
                 }
     
@@ -1839,7 +1839,7 @@ document.addEventListener('DOMContentLoaded', async() => {
         const isFestivo = FechaFestivos.some(festivo => 
             festivo.month === date.getMonth() && festivo.day === date.getDate()
         );
-        return dayOfWeek === 0 || dayOfWeek === 6 || isFestivo || esSemanaSanta(date); // Sigue igual, los sábados (6) no se consideran no válidos
+        return dayOfWeek === 0 ||isFestivo || esSemanaSanta(date); 
     }
 
     function contarDiasValidos(start, end) {
