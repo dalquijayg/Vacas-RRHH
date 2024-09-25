@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', async() => {
             await connection.close();
             return result[0].tienePermiso = 123;
         } catch (error) {
-            console.error('Error al verificar permiso 001:', error);
+            console.error('Error al verificar permiso 123:', error);
             return false;
         }
     }    
@@ -928,7 +928,7 @@ document.addEventListener('DOMContentLoaded', async() => {
             connection = await odbc.connect(conexion);
             const inputs = document.querySelectorAll('.input-dias');
             const requests = [];
-    
+            const esAdmin = await tienePermiso123();
             for (const input of inputs) {
                 const diasSolicitados = parseInt(input.value);
                 if (diasSolicitados > 0) {
@@ -954,13 +954,15 @@ document.addEventListener('DOMContentLoaded', async() => {
                     const totalDiasTomados = vacationInfo.DiasTomados + vacationInfo.DiasPagados;
                     const diasDisponiblesEnPeriodo = 15 - totalDiasTomados;
     
-                    if (totalDiasTomados >= 7.5) { // Más del 50% de los días ya utilizados
-                        if (diasSolicitados < diasDisponiblesEnPeriodo) {
-                            throw new Error(`Para el período ${periodo}, debe solicitar todos los ${diasDisponiblesEnPeriodo} días restantes.`);
-                        }
-                    } else {
-                        if (diasSolicitados < selectedEmployeeDiasMinVP) {
-                            throw new Error(`Para el período ${periodo}, debe solicitar al menos ${selectedEmployeeDiasMinVP} días de vacaciones.`);
+                    if (!esAdmin) {
+                        if (totalDiasTomados >= 7.5) { // Más del 50% de los días ya utilizados
+                            if (diasSolicitados < diasDisponiblesEnPeriodo) {
+                                throw new Error(`Para el período ${periodo}, debe solicitar todos los ${diasDisponiblesEnPeriodo} días restantes.`);
+                            }
+                        } else {
+                            if (diasSolicitados < selectedEmployeeDiasMinVP) {
+                                throw new Error(`Para el período ${periodo}, debe solicitar al menos ${selectedEmployeeDiasMinVP} días de vacaciones.`);
+                            }
                         }
                     }
     
@@ -1177,13 +1179,15 @@ document.addEventListener('DOMContentLoaded', async() => {
             if (!periodo) {
                 throw new Error('No se pudo determinar el período de vacaciones');
             }
-    
+            
             const vacationInfo = await getVacationInfo(selectedEmployeeId, periodo);
             const totalDiasTomados = vacationInfo.DiasTomados + totalDays;
             const diasMinimos = selectedEmployeeDiasMinVT;
-    
+
+            const esAdmin = await tienePermiso123();
+
             // Modificamos esta parte para incluir la nueva condición
-            if (diasMinimos > 1 && totalDiasTomados < 15 * 0.5 && totalDays < diasMinimos) {
+            if (!esAdmin && diasMinimos > 1 && totalDiasTomados < 15 * 0.5 && totalDays < diasMinimos) {
                 throw new Error(`Debe seleccionar al menos ${diasMinimos} días de vacaciones.`);
             }
     
@@ -1237,11 +1241,26 @@ document.addEventListener('DOMContentLoaded', async() => {
     
             await connection.close();
     
-            Swal.fire({
-                icon: 'success',
-                title: 'Vacaciones guardadas',
-                text: 'Las vacaciones han sido registradas correctamente.',
-            });
+            const periodoCompleto = await verificarDiasVacacionesCompletos(selectedEmployeeId, periodo);
+            if (periodoCompleto) {
+                // Obtener información del empleado
+                const employeeInfo = await getEmployeeInfo(selectedEmployeeId);
+                
+                // Generar y descargar el PDF
+                await generateVacationDocument(selectedEmployeeId, periodo, employeeInfo.NombreCompleto, employeeInfo.No_DPI, employeeInfo.Nombre_Planilla);
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Período de vacaciones completado',
+                    text: 'Se ha generado automáticamente el documento de vacaciones.',
+                });
+            } else {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Vacaciones guardadas',
+                    text: 'Las vacaciones han sido registradas correctamente.',
+                });
+            }
     
             // Actualizar la lista de empleados y el calendario
             await updateEmployeeInfo(selectedEmployeeId);
@@ -1258,252 +1277,32 @@ document.addEventListener('DOMContentLoaded', async() => {
         }
         hideLoader();
     }
-    // Cargar datos en los comboboxes
-    const loadDepartments = async () => {
+    async function getEmployeeInfo(employeeId) {
         try {
-            const connection = await odbc.connect(conexion);
-            const departments = await connection.query(`SELECT IdDeptoGuate, NombreDepartamento FROM recursos_humanos.departamentosguate`);
-            const departamentoSelect = document.getElementById('departamentoguate');
-            departments.forEach(department => {
-                const option = document.createElement('option');
-                option.value = department.IdDeptoGuate;
-                option.textContent = department.NombreDepartamento;
-                departamentoSelect.appendChild(option);
-            });
+            const connection = await conectar();
+            const query = `
+                SELECT 
+                    CONCAT(Primer_Nombre, ' ', IFNULL(Segundo_Nombre, ''), ' ', Primer_Apellido, ' ', IFNULL(Segundo_Apellido, '')) AS NombreCompleto,
+                    No_DPI,
+                    planillas.Nombre_Planilla
+                FROM personal
+                JOIN planillas ON personal.Id_Planilla = planillas.Id_Planilla
+                WHERE personal.Id = ?
+            `;
+            const [result] = await connection.query(query, [employeeId]);
+            await connection.close();
+            return result;
         } catch (error) {
-            console.error('Error loading departments:', error);
+            console.error('Error al obtener información del empleado:', error);
+            throw error;
         }
-    };
+    }
     const sectionHeaders = document.querySelectorAll('.form-section-header');
     sectionHeaders.forEach(header => {
         header.addEventListener('click', () => {
             const content = header.nextElementSibling;
             header.classList.toggle('collapsed');
             content.classList.toggle('collapsed');
-        });
-    });
-
-    const loadMunicipios = async (departmentId) => {
-        try {
-            const connection = await odbc.connect(conexion);
-            const municipios = await connection.query(`SELECT IdMunicipios, NombreMunicipio FROM recursos_humanos.municipios WHERE IdDepartamentoGuate = ?`, [departmentId]);
-            const municipioSelect = document.getElementById('municipio');
-            municipioSelect.innerHTML = '';
-            municipios.forEach(municipio => {
-                const option = document.createElement('option');
-                option.value = municipio.IdMunicipios;
-                option.textContent = municipio.NombreMunicipio;
-                municipioSelect.appendChild(option);
-            });
-        } catch (error) {
-            console.error('Error loading municipios:', error);
-        }
-    };
-    const loadEstadoCivil = async () => {
-        try {
-            const connection = await odbc.connect(conexion);
-            const estadosCiviles = await connection.query('SELECT IdEstadoCivil, NombreEstadoCivil FROM estadocivil');
-            const estadoCivilSelect = document.getElementById('estadoCivil');
-            estadosCiviles.forEach(estado => {
-                const option = document.createElement('option');
-                option.value = estado.IdEstadoCivil;
-                option.textContent = estado.NombreEstadoCivil;
-                estadoCivilSelect.appendChild(option);
-            });
-        } catch (error) {
-            console.error('Error loading estados civiles:', error);
-        }
-    };
-
-    const loadGenero = async () => {
-        try {
-            const connection = await odbc.connect(conexion);
-            const generos = await connection.query('SELECT IdGenero, NombreGenero FROM genero');
-            const generoSelect = document.getElementById('genero');
-            generos.forEach(genero => {
-                const option = document.createElement('option');
-                option.value = genero.IdGenero;
-                option.textContent = genero.NombreGenero;
-                generoSelect.appendChild(option);
-            });
-        } catch (error) {
-            console.error('Error loading géneros:', error);
-        }
-    };
-
-    const loadHijos = async () => {
-        try {
-            const connection = await odbc.connect(conexion);
-            const hijos = await connection.query('SELECT IdHijos, CantidadHijos FROM hijos');
-            const hijosSelect = document.getElementById('hijos');
-            hijos.forEach(hijo => {
-                const option = document.createElement('option');
-                option.value = hijo.IdHijos;
-                option.textContent = hijo.CantidadHijos;
-                hijosSelect.appendChild(option);
-            });
-        } catch (error) {
-            console.error('Error loading hijos:', error);
-        }
-    };
-
-    const loadTipoSangre = async () => {
-        try {
-            const connection = await odbc.connect(conexion);
-            const tiposSangre = await connection.query('SELECT IdTipoSangre, TipoSangre FROM tipodesangre');
-            const tipoSangreSelect = document.getElementById('tipoSangre');
-            tiposSangre.forEach(tipo => {
-                const option = document.createElement('option');
-                option.value = tipo.IdTipoSangre;
-                option.textContent = tipo.TipoSangre;
-                tipoSangreSelect.appendChild(option);
-            });
-        } catch (error) {
-            console.error('Error loading tipos de sangre:', error);
-        }
-    };
-
-    const loadParentescos = async () => {
-        try {
-            const connection = await odbc.connect(conexion);
-            const parentescos = await connection.query('SELECT IdParentesco, NombreParentesco FROM parentescos');
-            const parentescoSelect = document.getElementById('parentescoContactoEmergencia');
-            parentescos.forEach(parentesco => {
-                const option = document.createElement('option');
-                option.value = parentesco.IdParentesco;
-                option.textContent = parentesco.NombreParentesco;
-                parentescoSelect.appendChild(option);
-            });
-        } catch (error) {
-            console.error('Error loading parentescos:', error);
-        }
-    };
-
-    const loadDivisiones = async () => {
-        try {
-            const connection = await odbc.connect(conexion);
-            const divisiones = await connection.query('SELECT IdDivison, NombreDivision FROM divisiones');
-            const divisionSelect = document.getElementById('division');
-            divisiones.forEach(division => {
-                const option = document.createElement('option');
-                option.value = division.IdDivison;
-                option.textContent = division.NombreDivision;
-                divisionSelect.appendChild(option);
-            });
-        } catch (error) {
-            console.error('Error loading divisiones:', error);
-        }
-    };
-
-    const loadDepartamentos = async (divisionId) => {
-        try {
-            const connection = await odbc.connect(conexion);
-            const departamentos = await connection.query('SELECT IdDepartamento, Nombre FROM departamentos WHERE IdDivision = ?', [divisionId]);
-            const departamentoSelect = document.getElementById('departamento');
-            departamentoSelect.innerHTML = '';
-            departamentos.forEach(departamento => {
-                const option = document.createElement('option');
-                option.value = departamento.IdDepartamento;
-                option.textContent = departamento.Nombre;
-                departamentoSelect.appendChild(option);
-            });
-        } catch (error) {
-            console.error('Error loading departamentos:', error);
-        }
-    };
-    const loadPuestosGenerales = async () => {
-        try {
-            const connection = await odbc.connect(conexion);
-            const puestosGenerales = await connection.query('SELECT IdPuestoGeneral, NombrePuestoGeneral FROM puestogenerales');
-            const puestoGeneralSelect = document.getElementById('puestoGeneral');
-            puestosGenerales.forEach(puesto => {
-                const option = document.createElement('option');
-                option.value = puesto.IdPuestoGeneral;
-                option.textContent = puesto.NombrePuestoGeneral;
-                puestoGeneralSelect.appendChild(option);
-            });
-        } catch (error) {
-            console.error('Error loading puestos generales:', error);
-        }
-    };
-
-    const loadPlanillas = async () => {
-        try {
-            const connection = await odbc.connect(conexion);
-            const planillas = await connection.query('SELECT IdPlanilla, NombrePlanilla FROM planillas');
-            const planillaSelect = document.getElementById('planilla');
-            planillas.forEach(planilla => {
-                const option = document.createElement('option');
-                option.value = planilla.IdPlanilla;
-                option.textContent = planilla.NombrePlanilla;
-                planillaSelect.appendChild(option);
-            });
-        } catch (error) {
-            console.error('Error loading planillas:', error);
-        }
-    };
-
-    // Cargar todos los datos iniciales
-    loadEstadoCivil();
-    loadGenero();
-    loadHijos();
-    loadTipoSangre();
-    loadParentescos();
-    loadDivisiones();
-    loadPuestosGenerales();
-    loadPlanillas();
-
-    // Manejar la dependencia entre División y Departamento
-    document.getElementById('division').addEventListener('change', (event) => {
-        loadDepartamentos(event.target.value);
-    });
-
-    document.getElementById('departamentoguate').addEventListener('change', (event) => {
-        loadMunicipios(event.target.value);
-    });
-
-    loadDepartments();
-
-    // Manejo del formulario
-    document.getElementById('personalDataForm').addEventListener('submit', (event) => {
-        event.preventDefault();
-
-        const primerNombre = document.getElementById('primerNombre').value;
-        const segundoNombre = document.getElementById('segundoNombre').value;
-        const primerApellido = document.getElementById('primerApellido').value;
-        const segundoApellido = document.getElementById('segundoApellido').value;
-        const fechaNacimiento = document.getElementById('fechaNacimiento').value;
-        const noDPI = document.getElementById('noDPI').value;
-        const departamentosguate = document.getElementById('departamentoguate').value;
-        const municipio = document.getElementById('municipio').value;
-        const noTelefono = document.getElementById('noTelefono').value;
-        const estadoCivil = document.getElementById('estadoCivil').value;
-        const genero = document.getElementById('genero').value;
-        const hijos = document.getElementById('hijos').value;
-        const tipoSangre = document.getElementById('tipoSangre').value;
-        const nombreContactoEmergencia = document.getElementById('nombreContactoEmergencia').value;
-        const telefonoContactoEmergencia = document.getElementById('telefonoContactoEmergencia').value;
-        const parentescoContactoEmergencia = document.getElementById('parentescoContactoEmergencia').value;
-        const division = document.getElementById('division').value;
-        const departamento = document.getElementById('departamento').value;
-
-        // Validar que los municipios coincidan con el departamento seleccionado
-        if (document.getElementById('municipio').options.length === 0) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Debe seleccionar un municipio válido para el departamento seleccionado.',
-            });
-            return;
-        }
-
-        // Aquí puedes añadir el código para guardar los datos en la base de datos
-        // ...
-
-        Swal.fire({
-            icon: 'success',
-            title: 'Éxito',
-            text: 'Datos guardados correctamente.',
         });
     });
     const FechaFestivos = [
@@ -1522,6 +1321,28 @@ document.addEventListener('DOMContentLoaded', async() => {
         { month: 11, day: 7 },
         { month: 11, day: 8 },
         { month: 11, day: 9 },
+        { month: 11, day: 10 },
+        { month: 11, day: 11 },
+        { month: 11, day: 12 },
+        { month: 11, day: 13 },
+        { month: 11, day: 14 },
+        { month: 11, day: 15 },
+        { month: 11, day: 16 },
+        { month: 11, day: 17 },
+        { month: 11, day: 18 },
+        { month: 11, day: 19 },
+        { month: 11, day: 20 },
+        { month: 11, day: 21 },
+        { month: 11, day: 22 },
+        { month: 11, day: 23 },
+        { month: 11, day: 24 },
+        { month: 11, day: 25 },
+        { month: 11, day: 26 },
+        { month: 11, day: 27 },
+        { month: 11, day: 28 },
+        { month: 11, day: 29 },
+        { month: 11, day: 30 },
+        { month: 11, day: 31 },
     ];
     // Función para determinar si es Semana Santa
     function esSemanaSanta(fecha) {
@@ -1575,6 +1396,148 @@ document.addEventListener('DOMContentLoaded', async() => {
             return [];
         }
     }
+    async function verificarDiasVacacionesCompletos(employeeId, periodo) {
+        try {
+            const connection = await odbc.connect(conexion);
+            const query = `
+                SELECT 
+                    IFNULL(SUM(CASE WHEN tipo = 'tomadas' THEN dias ELSE 0 END), 0) AS DiasTomados,
+                    IFNULL(SUM(CASE WHEN tipo = 'pagadas' THEN dias ELSE 0 END), 0) AS DiasPagados
+                FROM (
+                    SELECT 'tomadas' AS tipo, DiasSolicitado AS dias 
+                    FROM vacacionestomadas 
+                    WHERE IdPersonal = ? AND Periodo = ?
+                    UNION ALL
+                    SELECT 'pagadas' AS tipo, DiasSolicitado AS dias 
+                    FROM vacacionespagadas 
+                    WHERE IdPersonal = ? AND Periodo = ? AND Estado IN (1,2,3)
+                ) AS vacaciones
+            `;
+            const [result] = await connection.query(query, [employeeId, periodo, employeeId, periodo]);
+            await connection.close();
+    
+            const totalDiasConsumidos = result.DiasTomados + result.DiasPagados;
+            return totalDiasConsumidos >= 15;
+        } catch (error) {
+            console.error('Error al verificar días de vacaciones completos:', error);
+            return false;
+        }
+    }
+    async function confirmarEliminarVacacion(fecha) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+    
+        if (fecha < today) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Acción no permitida',
+                text: 'No se pueden eliminar fechas de vacaciones pasadas.',
+            });
+            return;
+        }
+    
+        if (await tienePermiso123()) {
+            const result = await Swal.fire({
+                title: '¿Eliminar vacación?',
+                text: `¿Estás seguro de que quieres eliminar la vacación del ${fecha.toLocaleDateString()}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+    
+            if (result.isConfirmed) {
+                await eliminarVacacion(fecha);
+            }
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Permiso denegado',
+                text: 'No tienes permiso para eliminar fechas de vacaciones.',
+            });
+        }
+    }
+    
+    async function eliminarVacacion(fecha) {
+        if (!await tienePermiso123()) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Permiso denegado',
+                text: 'No tienes permiso para eliminar fechas de vacaciones.',
+            });
+            return;
+        }
+    
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+    
+        if (fecha < today) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Acción no permitida',
+                text: 'No se pueden eliminar fechas de vacaciones pasadas.',
+            });
+            return;
+        }
+    
+        let connection;
+        try {
+            connection = await odbc.connect(conexion);
+    
+            // Iniciar transacción
+            await connection.query('START TRANSACTION');
+    
+            // Primero, insertar en la tabla FechasVacacionesEliminadas
+            const insertQuery = `
+                INSERT INTO FechasVacacionesEliminadas 
+                (IdPersonal, FechaTomada, FechaEliminacion, IdEncargadoelimino)
+                VALUES (?, ?, CURDATE(), ?)
+            `;
+            await connection.query(insertQuery, [
+                selectedEmployeeId,
+                fecha.toISOString().split('T')[0],
+                idencargado
+            ]);
+    
+            // Luego, eliminar de la tabla vacacionestomadas
+            const deleteQuery = `
+                DELETE FROM vacacionestomadas 
+                WHERE IdPersonal = ? AND FechasTomadas = ?
+            `;
+            await connection.query(deleteQuery, [selectedEmployeeId, fecha.toISOString().split('T')[0]]);
+    
+            // Confirmar transacción
+            await connection.query('COMMIT');
+    
+            Swal.fire({
+                icon: 'success',
+                title: 'Eliminado',
+                text: 'La fecha de vacación ha sido eliminada y registrada.',
+            });
+    
+            // Actualizar la información del empleado y el calendario
+            await updateEmployeeInfo(selectedEmployeeId);
+            await loadEmployeeList();
+            await initializeCalendar();
+        } catch (error) {
+            // Si hay un error, revertir la transacción
+            if (connection) {
+                await connection.query('ROLLBACK');
+            }
+            console.error('Error eliminando vacación:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Hubo un problema al eliminar la fecha de vacación: ' + error.message,
+            });
+        } finally {
+            if (connection) {
+                await connection.close();
+            }
+        }
+    }
     async function initializeCalendar() {
         if (calendar) {
             calendar.destroy();
@@ -1592,9 +1555,33 @@ document.addEventListener('DOMContentLoaded', async() => {
                 center: 'title',
                 right: 'today prev,next'
             },
-            datesSet: function(info) {
-                // Guardar la fecha actual del calendario
-                calendar.currentViewDate = info.view.currentStart;
+            dateClick: async function(info) {
+                const clickedDate = info.date;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // Establecer la hora a medianoche para comparar solo fechas
+    
+                if (esFechaVacaciones(clickedDate, vacationDates)) {
+                    if (await tienePermiso123()) {
+                        if (clickedDate >= today) {
+                            confirmarEliminarVacacion(clickedDate);
+                        } else {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Acción no permitida',
+                                text: 'No se pueden eliminar fechas de vacaciones pasadas.',
+                            });
+                        }
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Permiso denegado',
+                            text: 'No tienes permiso para eliminar fechas de vacaciones.',
+                        });
+                    }
+                } else if (!esFechaNoValida(clickedDate) && (clickedDate >= today || permiso123)) {
+                    // Aquí puedes mantener la lógica existente para agregar nuevas fechas
+                    // O puedes llamar a una función separada para manejar la adición de nuevas fechas
+                }
             },
             customButtons: {
                 monthYearSelector: {
@@ -1616,7 +1603,7 @@ document.addEventListener('DOMContentLoaded', async() => {
                 const date = info.date;
                 const dayOfWeek = date.getDay();
     
-                if (dayOfWeek === 0) {
+                if (dayOfWeek === 0 || dayOfWeek === 6) {
                     info.el.style.backgroundColor = 'rgba(255, 0, 0, 0.1)';
                 }
     
@@ -1706,8 +1693,8 @@ document.addEventListener('DOMContentLoaded', async() => {
                     
                     const diasTotalesUsados = vacationInfo.DiasTomados + vacationInfo.DiasPagados;
                     const diasDisponibles = 15 - diasTotalesUsados;
-
-                    if (selectedEmployeeDiasMinVT > 1) {  // Añadimos esta condición
+                    const esAdmin = await tienePermiso123();
+                    if (!esAdmin && selectedEmployeeDiasMinVT > 1) {  // Añadimos esta condición
                         if (diasTotalesUsados >= 7.5) { // Más del 50% de los días ya utilizados
                             if (days < diasDisponibles) {
                                 Swal.fire({
@@ -1839,7 +1826,7 @@ document.addEventListener('DOMContentLoaded', async() => {
         const isFestivo = FechaFestivos.some(festivo => 
             festivo.month === date.getMonth() && festivo.day === date.getDate()
         );
-        return dayOfWeek === 0 ||isFestivo || esSemanaSanta(date); 
+        return dayOfWeek === 0 || dayOfWeek === 6 ||isFestivo || esSemanaSanta(date); 
     }
 
     function contarDiasValidos(start, end) {
