@@ -141,6 +141,7 @@ document.addEventListener('DOMContentLoaded', async() => {
         document.getElementById('reporte-vacaciones-section').style.display='none';
         document.getElementById('reporte-vacaciones-grid').style.display='none';
         document.getElementById('pagos-autorizados-section').style.display='none';
+        document.getElementById('departamento-filter').style.display = 'block';
     }
     async function verificarPermiso(codigo) {
         try {
@@ -207,6 +208,7 @@ document.addEventListener('DOMContentLoaded', async() => {
                 document.querySelector('.saludo-card').style.display = 'none';
                 document.getElementById('employee-table').className = 'toma-vacaciones';
                 document.getElementById('action-title').textContent = 'Registro para Toma de vacaciones';
+                document.getElementById('departamento-filter').style.display = 'none';
                 await loadEmployeeList('toma-vacaciones');
             } else {
                 Swal.fire({
@@ -231,6 +233,7 @@ document.addEventListener('DOMContentLoaded', async() => {
                 document.querySelector('.saludo-card').style.display = 'none';
                 document.getElementById('employee-table').className = 'pago-vacaciones';
                 document.getElementById('action-title').textContent = 'Solicitud pago vacaciones';
+                document.getElementById('departamento-filter').style.display = 'none';
                 await loadEmployeeList('pago-vacaciones');
             } else {
                 Swal.fire({
@@ -1111,6 +1114,7 @@ document.addEventListener('DOMContentLoaded', async() => {
             throw error;
         }
     }
+
     let calendar;
     async function getPeriodoVacaciones(inicioPlanilla, idPersonal) {
         try {
@@ -1544,7 +1548,9 @@ document.addEventListener('DOMContentLoaded', async() => {
         }
     
         const vacationDates = await getVacationDates(selectedEmployeeId);
+        const vacacionesTomadas = await getVacacionesTomadas(idDepartamento);
         const permiso001 = await tienePermiso123();
+        const noMaxPers = await getNoMaxPers(idDepartamento);
     
         const calendarEl = document.getElementById('vacation-calendar');
         calendar = new FullCalendar.Calendar(calendarEl, {
@@ -1554,6 +1560,18 @@ document.addEventListener('DOMContentLoaded', async() => {
                 left: 'prev,next today monthYearSelector',
                 center: 'title',
                 right: 'today prev,next'
+            },
+            events: vacacionesTomadas.map(vt => ({
+                title: vt.NombreCompleto,
+                start: vt.FechasTomadas,
+                allDay: true,
+                backgroundColor: '#4CAF50',
+                borderColor: '#4CAF50'
+            })),
+            eventContent: function(arg) {
+                return {
+                    html: `<div class="fc-event-title">${arg.event.title}</div>`
+                };
             },
             dateClick: async function(info) {
                 const clickedDate = info.date;
@@ -1646,14 +1664,6 @@ document.addEventListener('DOMContentLoaded', async() => {
                 const isNotVacationStart = !esFechaVacaciones(selectInfo.start, vacationDates);
                 const isNotVacationEnd = !esFechaVacaciones(new Date(selectInfo.end.getTime() - 86400000), vacationDates);
 
-                console.log('Fecha seleccionada:', selectInfo.start);
-                console.log('Es después de hoy:', isAfterToday);
-                console.log('Inicio válido:', isStartValid);
-                console.log('Fin válido:', isEndValid);
-                console.log('No es vacación (inicio):', isNotVacationStart);
-                console.log('No es vacación (fin):', isNotVacationEnd);
-                console.log('Es selección de un solo día:', isSingleDaySelection);
-
                 return isAfterToday && isStartValid && isEndValid && isNotVacationStart && isNotVacationEnd;
             },
             select: async function(info) {
@@ -1672,7 +1682,29 @@ document.addEventListener('DOMContentLoaded', async() => {
 
                 try {
                     const periodo = await getPeriodoVacaciones(selectedEmployeeInicioPlanilla, selectedEmployeeId);
-
+                    const fechasSeleccionadas = [];
+                    
+                    let currentDate = new Date(start);
+                    while (currentDate < end) {
+                        if (!esFechaNoValida(currentDate)) {
+                            const personasEnVacaciones = await getPersonasEnVacaciones(currentDate, idDepartamento);
+                            if (personasEnVacaciones >= noMaxPers) {
+                                const confirmResult = await Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Límite de personas alcanzado',
+                                    text: `Ya hay ${personasEnVacaciones} personas de vacaciones el ${currentDate.toLocaleDateString()}. ¿Estás seguro de que quieres registrar estas vacaciones?`,
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Sí, registrar',
+                                    cancelButtonText: 'Cancelar'
+                                });
+                                if (!confirmResult.isConfirmed) {
+                                    return;
+                                }
+                            }
+                            fechasSeleccionadas.push(currentDate);
+                        }
+                        currentDate.setDate(currentDate.getDate() + 1);
+                    }
                     const connection = await odbc.connect(conexion);
                     const queryDiasUsados = `
                         SELECT 
@@ -2568,7 +2600,9 @@ document.addEventListener('DOMContentLoaded', async() => {
                             vacacionespagadas.FechaAutAnu,
                             CONCAT(autorizo.Primer_Nombre, ' ', IFNULL(autorizo.Segundo_Nombre, ''), ' ', autorizo.Primer_Apellido, ' ', IFNULL(autorizo.Segundo_Apellido, '')) AS PersonaAutorizo,
                             CONCAT(pago.Primer_Nombre, ' ', IFNULL(pago.Segundo_Nombre, ''), ' ', pago.Primer_Apellido, ' ', IFNULL(pago.Segundo_Apellido, '')) AS personapago,
-                            vacacionespagadas.FechaPago
+                            vacacionespagadas.FechaPago,
+                            vacacionespagadas.NoCheque,
+                            vacacionespagadas.NoRecibo
                         FROM
                             vacacionespagadas
                             INNER JOIN personal ON vacacionespagadas.IdPersonal = personal.Id
@@ -2579,7 +2613,7 @@ document.addEventListener('DOMContentLoaded', async() => {
                             LEFT JOIN personal AS pago ON vacacionespagadas.IdPersonalpago = pago.Id
                         WHERE vacacionespagadas.Estado = 3
                     `;
-                    columns = ['ID', 'Nombre Completo', 'Fecha Registro', 'Días Solicitados', 'Periodo', 'Planilla', 'Departamento', 'Persona Registro', 'Total a Recibir', 'Fecha Autorización', 'Persona Autorizó', 'Persona Pago', 'Fecha Pago'];
+                    columns = ['ID', 'Nombre Completo', 'Fecha Registro', 'Días Solicitados', 'Periodo', 'Planilla', 'Departamento', 'Persona Registro', 'Total a Recibir', 'Fecha Autorización', 'Persona Autorizó', 'Persona Pago', 'Fecha Pago', 'No. Cheque', 'No. Recibo'];
                     break;
                 case '4': // Anulado
                     query = `
@@ -2670,6 +2704,12 @@ document.addEventListener('DOMContentLoaded', async() => {
                         break;
                     case 'Fecha Pago':
                         value = row.FechaPago;
+                        break;
+                    case 'No. Cheque':
+                        value = row.NoCheque || '';
+                        break;
+                    case 'No. Recibo':
+                        value = row.NoRecibo || '';
                         break;
                     // Agregar casos para otras columnas según sea necesario
                 }
@@ -3006,6 +3046,63 @@ document.addEventListener('DOMContentLoaded', async() => {
                 title: 'Error',
                 text: 'Hubo un problema al finalizar el pago: ' + error.message,
             });
+        }
+    }
+    //esta parte funciona para mostrar las personas que estan de vacaciones segun en el area donde se encuentre el usuario que se ingreso
+    async function getVacacionesTomadas(departamentoId) {
+        try {
+            const connection = await conectar();
+            const query = `
+                SELECT 
+                    vt.FechasTomadas, 
+                    CONCAT(p.Primer_Nombre, ' ', IFNULL(p.Segundo_Nombre, ''), ' ', p.Primer_Apellido, ' ', IFNULL(p.Segundo_Apellido, '')) AS NombreCompleto
+                FROM 
+                    vacacionestomadas vt
+                INNER JOIN 
+                    personal p ON vt.IdPersonal = p.Id
+                WHERE 
+                    vt.IdDepartamento = ?
+                ORDER BY 
+                    vt.FechasTomadas
+            `;
+            const result = await connection.query(query, [departamentoId]);
+            await connection.close();
+            return result;
+        } catch (error) {
+            console.error('Error al obtener vacaciones tomadas:', error);
+            return [];
+        }
+    }
+    async function getPersonasEnVacaciones(fecha, departamentoId) {
+        try {
+            const connection = await conectar();
+            const query = `
+                SELECT COUNT(*) AS personasEnVacaciones
+                FROM vacacionestomadas
+                WHERE FechasTomadas = ? AND IdDepartamento = ?
+            `;
+            const result = await connection.query(query, [fecha.toISOString().split('T')[0], departamentoId]);
+            await connection.close();
+            return result[0].personasEnVacaciones;
+        } catch (error) {
+            console.error('Error al obtener personas en vacaciones:', error);
+            return 0;
+        }
+    }
+    async function getNoMaxPers(departamentoId) {
+        try {
+            const connection = await conectar();
+            const query = `
+                SELECT NoMaxPers 
+                FROM departamentos 
+                WHERE Id_Departamento = ?
+            `;
+            const result = await connection.query(query, [departamentoId]);
+            await connection.close();
+            return result[0].NoMaxPers;
+        } catch (error) {
+            console.error('Error al obtener NoMaxPers:', error);
+            return 0;
         }
     }
 });
