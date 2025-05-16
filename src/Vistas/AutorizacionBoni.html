@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autorización de Bonificaciones</title>
+    <link rel="stylesheet" href="../Disenos/AutorizacionBoni.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <h1>Autorización de Bonificaciones</h1>
+        </div>
+
+        <div class="content">
+            <div class="stats-strip">
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Pendientes</span>
+                        <span class="stat-value" id="pendingCount">0</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <span style="font-weight: bold; font-size: 1.5rem;">Q</span>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Total</span>
+                        <span class="stat-value" id="totalAmount">Q0.00</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Último Mes</span>
+                        <span class="stat-value" id="lastMonthCount">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Buscar por nombre, departamento o ID...">
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="bonificacionesTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre que Generó</th>
+                            <th>Departamento</th>
+                            <th>Fecha</th>
+                            <th>Monto Total</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bonificacionesBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="../Logica/AutorizacionBoni.js"></script>
+</body>
+</html>

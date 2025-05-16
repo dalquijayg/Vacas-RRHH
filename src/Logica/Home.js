@@ -1,5 +1,6 @@
+const { ipcRenderer } = require('electron');
 document.addEventListener('DOMContentLoaded', async() => {
-    const userData = JSON.parse(sessionStorage.getItem('userData'));
+    const userData = JSON.parse(localStorage.getItem('userData'));
     const nombreCompleto = userData.NombreCompleto;
     const idencargado = userData.Id;
     const idDepartamento = userData.Id_Departamento;
@@ -25,6 +26,8 @@ document.addEventListener('DOMContentLoaded', async() => {
     const vacacionesTab = document.getElementById('gestion-vacaciones-tab');
     const adminSubmenu = document.getElementById('administracion-submenu');
     const vacacionesSubmenu = document.getElementById('gestion-vacaciones-submenu');
+    const operacionestab = document.getElementById('Operaciones-tab');
+    const operacionesSubmenu = document.getElementById('Operaciones-submenu');
     const submenuContainer = document.querySelector('.submenu-container');
 
     function toggleSubmenu(submenu) {
@@ -33,6 +36,7 @@ document.addEventListener('DOMContentLoaded', async() => {
         // Ocultar todos los submenús
         adminSubmenu.classList.remove('active');
         vacacionesSubmenu.classList.remove('active');
+        operacionesSubmenu.classList.remove('active');
         
         if (!isActive) {
             // Mostrar el submenú seleccionado
@@ -58,6 +62,8 @@ document.addEventListener('DOMContentLoaded', async() => {
         submenuContainer.style.animation = 'slideUp 0.3s ease-in forwards';
         adminTab.classList.remove('active');
         vacacionesTab.classList.remove('active');
+        operacionestab.classList.remove('active');
+        operacionesSubmenu.classList.remove('active');
     }
 
     function activateSubmenuSection(title) {
@@ -77,6 +83,7 @@ document.addEventListener('DOMContentLoaded', async() => {
         toggleSubmenu(adminSubmenu);
         adminTab.classList.toggle('active');
         vacacionesTab.classList.remove('active');
+        operacionestab.classList.remove('active');
     });
 
     vacacionesTab.addEventListener('click', function(e) {
@@ -84,7 +91,15 @@ document.addEventListener('DOMContentLoaded', async() => {
         toggleSubmenu(vacacionesSubmenu);
         vacacionesTab.classList.toggle('active');
         adminTab.classList.remove('active');
+        operacionestab.classList.remove('active');
     });
+    operacionestab.addEventListener('click',function(e){
+        e.preventDefault();
+        toggleSubmenu(operacionesSubmenu);
+        vacacionesTab.classList.toggle('active');
+        adminTab.classList.remove('active');
+        operacionestab.classList.remove('active');
+    })
 
     // Manejar clics en los títulos de submenú
     document.querySelectorAll('.submenu-title').forEach(title => {
@@ -559,7 +574,7 @@ document.addEventListener('DOMContentLoaded', async() => {
                         personal
                         INNER JOIN
                         puestos
-                        ON 
+                        ON
                             personal.Id_Puesto = puestos.Id_Puesto
                         INNER JOIN
                         departamentos
@@ -3105,6 +3120,15 @@ document.addEventListener('DOMContentLoaded', async() => {
             return 0;
         }
     }
+});
+document.getElementById('bonificaciones').addEventListener('click', () => {
+    ipcRenderer.send('open_Adicionales');
+});
+document.getElementById('Autorizacion-Bonis').addEventListener('click', () => {
+    ipcRenderer.send('open_Autorizaciones');
+});
+document.getElementById('Entrega').addEventListener('click', () => {
+    ipcRenderer.send('open_Entregas');
 });
 window.onload = function() {
     const saludoTitle = document.getElementById('saludo-title');

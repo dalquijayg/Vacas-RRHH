@@ -1,0 +1,79 @@
+:root {
+    --primary: #2563eb;
+    --secondary: #64748b;
+    --background: #f8fafc;
+    --surface: #ffffff;
+    --text: #1e293b;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--background);
+    color: var(--text);
+    margin: 0;
+    padding: 2rem;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: var(--surface);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 2rem;
+}
+
+h1 {
+    color: var(--primary);
+    margin-bottom: 2rem;
+    font-weight: 600;
+}
+
+.empleados-grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.empleado-card {
+    background: var(--surface);
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 1.5rem;
+    transition: transform 0.2s;
+}
+
+.empleado-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.empleado-nombre {
+    color: var(--primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.empleado-puesto {
+    color: var(--secondary);
+    font-size: 0.9rem;
+}
+
+.empleado-id {
+    color: var(--secondary);
+    font-size: 0.8rem;
+    margin-top: 1rem;
+}
+.submenu-subsection {
+    margin-left: 15px;
+}
+
+.nested-menu {
+    margin-left: 15px;
+    display: none;
+}
+
+.submenu-subsection:hover .nested-menu {
+    display: block;
+}
